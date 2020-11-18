@@ -8,11 +8,17 @@
         <version>2.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.chaindigg</groupId>
-    <artifactId>monitor_java</artifactId>
+
+    <groupId>com.chaindigg.monitor</groupId>
+    <artifactId>monitor</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>monitor_java</name>
-    <description>Monitor project for Spring Boot</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>common</module>
+        <module>admin</module>
+        <module>user-aipi</module>
+    </modules>
 
     <properties>
         <java.version>1.8</java.version>
@@ -78,32 +84,7 @@
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
             <version>3.0.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>swagger-annotations</artifactId>
-                    <groupId>io.swagger</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-spring-ui</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.20</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
