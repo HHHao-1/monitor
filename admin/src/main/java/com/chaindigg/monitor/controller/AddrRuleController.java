@@ -1,9 +1,10 @@
 package com.chaindigg.monitor.controller;
 
 
-import com.chaindigg.monitor.entity.AddrRule;
 import com.chaindigg.monitor.service.IAddrRuleService;
+import com.chaindigg.monitor.vo.AddrRuleVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +23,10 @@ import java.util.List;
 public class AddrRuleController {
   private final IAddrRuleService addrRuleService;
 
-  @GetMapping("/addr-rules/{id}")
-  public List<AddrRule> getAllRulesListByUserId(@PathVariable String id, int currentPage, int pageSize) {
-    return addrRuleService.selectByUserId(id, currentPage, pageSize);
-  }
 
   @GetMapping("/addr-rules")
-  public List<AddrRule> getAllRulesList(int currentPage, int pageSize) {
-    return addrRuleService.selectAll(currentPage, pageSize);
+  public List<AddrRuleVO> getAllRulesList(@Nullable String event, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
+    return addrRuleService.selectAll(event, userName, userId, currentPage, pageSize);
   }
 
 }

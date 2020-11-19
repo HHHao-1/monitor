@@ -3,7 +3,9 @@ package com.chaindigg.monitor.controller;
 
 import com.chaindigg.monitor.entity.TransRule;
 import com.chaindigg.monitor.service.ITransRuleService;
+import com.chaindigg.monitor.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +24,9 @@ import java.util.List;
 public class TransRuleController {
   private final ITransRuleService transRuleService;
 
-  @GetMapping("/transaction-rules/{id}")
-  public List<TransRule> getAllRulesListByUserId(@PathVariable String id, int currentPage, int pageSize) {
-    return transRuleService.selectByUserId(id, currentPage, pageSize);
-  }
-
   @GetMapping("/transaction-rules")
-  public List<TransRule> getAllRulesList(int currentPage, int pageSize) {
-    return transRuleService.selectAll(currentPage, pageSize);
+  public List<TransRuleVO> getAllRules(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
+    return transRuleService.selectAll(coin, userName, userId,currentPage, pageSize);
   }
 
 }

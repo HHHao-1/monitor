@@ -3,7 +3,9 @@ package com.chaindigg.monitor.controller;
 import com.chaindigg.monitor.entity.User;
 import com.chaindigg.monitor.service.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +24,8 @@ public class UserController {
   private final IUserService userService;
 
   @GetMapping("/users")
-  public List<User> getUserList(int currentPage, int pageSize) {
-    return userService.selectAll(currentPage, pageSize);
+  public List<User> getUsers(@Nullable String name, int currentPage, int pageSize) {
+    return userService.selectAll(name, currentPage, pageSize);
   }
 
   @PostMapping("/users")

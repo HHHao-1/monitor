@@ -2,6 +2,7 @@ package com.chaindigg.monitor.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chaindigg.monitor.vo.NoticeLogVO;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -16,9 +17,12 @@ import java.util.List;
  */
 
 public interface INoticeLogService extends IService<NoticeLogVO> {
-  List<NoticeLogVO> selectAddrAll(int currentPage, int pageSize);
 
-  List<NoticeLogVO> selectTransAll(int currentPage, int pageSize);
+  List<NoticeLogVO> selectAddrAll(@Nullable String eventName, @Nullable String coinKind, int currentPage, int pageSize);
 
-  List<NoticeLogVO> selectAll(int currentPage, int pageSize);
+
+  List<NoticeLogVO> selectTransAll(@Nullable String coinKind, int currentPage, int pageSize);
+
+
+  List<NoticeLogVO> selectAll(@Nullable String monitorType, @Nullable String eventName, @Nullable String coinKind, int currentPage, int pageSize);
 }

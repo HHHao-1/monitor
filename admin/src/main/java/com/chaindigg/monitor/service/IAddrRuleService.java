@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.chaindigg.monitor.entity.CoinKind;
+import com.chaindigg.monitor.vo.AddrRuleVO;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * @author chenghao
  * @since 2020-11-17
  */
-public interface ICoinKindService extends IService<CoinKind> {
+public interface IAddrRuleService extends IService<AddrRuleVO> {
 
-  List<CoinKind> selectAll(@Nullable String mainChain, @Nullable String coinName, int currentPage, int pageSize);
+  List<AddrRuleVO> selectAll(@Nullable String event, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize);
 }
