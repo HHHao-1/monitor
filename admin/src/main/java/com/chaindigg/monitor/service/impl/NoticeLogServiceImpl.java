@@ -37,16 +37,13 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogMapper, NoticeLog
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-
-    if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
-      queryWrapper.and(i -> i.eq("event_name", eventName).ne("coin_kind", coinKind));
-    } else if ((!StringUtils.isBlank(eventName)) && StringUtils.isBlank(coinKind)) {
+    if ((!StringUtils.isBlank(eventName))) {
       queryWrapper.eq("event_name", eventName);
-    } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+    }
+    if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("coin_kind", coinKind);
     }
-
-    return this.baseMapper.selectAddrAll(queryWrapper, page);
+    return this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
   }
 
   @Override
@@ -57,7 +54,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogMapper, NoticeLog
     if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("coin_kind", coinKind);
     }
-    return this.baseMapper.selectTransAll(queryWrapper, page);
+    return this.baseMapper.selectTransAll(queryWrapper, page).getRecords();
   }
 
   @Override
@@ -87,8 +84,10 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogMapper, NoticeLog
           break;
       }
     } else {
-      List<NoticeLogVO> list = this.baseMapper.selectAddrAll(null);
-      list.addAll(this.baseMapper.selectTransAll(null));
+      // 这里要查全部，pageSize取long的最大值
+      page = new Page<NoticeLogVO>(0L, 9223372036854775807L);
+      List<NoticeLogVO> list = this.baseMapper.selectAddrAll(null,page).getRecords();
+      list.addAll(this.baseMapper.selectTransAll(null,page).getRecords());
       list = list.stream()
           .sorted((p1, p2) -> p2.getNoticeTime().compareTo(p1.getNoticeTime()))
           .collect(Collectors.toList());

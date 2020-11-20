@@ -32,13 +32,13 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if(!StringUtils.isBlank(userId)){
-      queryWrapper.eq("user_id",userId);
-    }else if(!StringUtils.isBlank(userName)&& !StringUtils.isBlank(coin)){
-      queryWrapper.eq("name",userName).eq("coin_kind",coin);
-    }else if (!StringUtils.isBlank(userName) && StringUtils.isBlank(coin)){
+    if(!StringUtils.isBlank(userId)) {
+      queryWrapper.eq("user_id", userId);
+    }
+    if (!StringUtils.isBlank(userName)){
       queryWrapper.eq("name",userName);
-    }else if(StringUtils.isBlank(userName) && !StringUtils.isBlank(coin)){
+    }
+    if (!StringUtils.isBlank(coin)){
       queryWrapper.eq("coin_kind",coin);
     }
     return this.baseMapper.selectAll(queryWrapper, page).getRecords();

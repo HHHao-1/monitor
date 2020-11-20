@@ -25,6 +25,6 @@ public interface AddrRuleMapper extends BaseMapper<AddrRuleVO> {
   @Select("select a.*, b.name " +
       "from addr_rule a join user b " +
       "on a.user_id = b.id ")
-  IPage<AddrRuleVO> selectAll(@Param(Constants.WRAPPER) Wrapper wrapper, IPage page);
+  IPage<AddrRuleVO> selectAll(@Nullable Wrapper wrapper, IPage page);
 
 }
