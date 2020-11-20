@@ -1,6 +1,7 @@
 package com.chaindigg.monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,6 +13,8 @@ import com.chaindigg.monitor.service.ICoinKindService;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,13 +33,62 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind> i
     IPage<CoinKind> page = new Page<CoinKind>(currentPage, pageSize);
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if (!StringUtils.isBlank(mainChain) && !StringUtils.isBlank(coinName)){
-      queryWrapper.eq("main_chain",mainChain).eq("coin_name",coinName);
-    }else if(!StringUtils.isBlank(mainChain) && StringUtils.isBlank(coinName)){
+    if (!StringUtils.isBlank(mainChain)) {
       queryWrapper.eq("main_chain",mainChain);
-    }else if(StringUtils.isBlank(mainChain) && !StringUtils.isBlank(coinName)){
+    }
+    if (!StringUtils.isBlank(coinName)) {
       queryWrapper.eq("coin_name",coinName);
     }
     return this.page(page,queryWrapper).getRecords();
+  }
+
+  @Override
+  public Boolean add(String mainChain, String coinName, String contract, Integer point) {
+    CoinKind coinKind = new CoinKind();
+    coinKind.setMainChain(mainChain)
+        .setCoinName(coinName)
+        .setContractAddr(contract)
+        .setPoint(point)
+        .setCreateTime(LocalDateTime.now())
+        .setUpdateTime(LocalDateTime.now());
+    return this.save(coinKind);
+  }
+
+  @Override
+  public Boolean delete(String mainChain, @Nullable String coinName, @Nullable String contract, @Nullable Integer point) {
+    QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("main_chain", mainChain).eq("point", point);
+    if (!StringUtils.isBlank(coinName)){
+      queryWrapper.eq("coin_name",coinName);
+    }
+    if (!StringUtils.isBlank(contract)) {
+      queryWrapper.eq("contract_addr",contract);
+    }
+    return this.remove(queryWrapper);
+  }
+
+  @Override
+  public Boolean update(String mainChain, @Nullable String coinName, @Nullable String contract, Integer point,
+                        @Nullable String mainChainNew, @Nullable String coinNameNew, @Nullable String contractNew, @Nullable Integer pointNew) {
+    UpdateWrapper<CoinKind> updateWrapper = new UpdateWrapper<>();
+    updateWrapper.eq("main_chain", mainChain).eq("point", point);
+    if (!StringUtils.isBlank(coinName)){
+      updateWrapper.eq("coin_name", coinName);
+    }if (!StringUtils.isBlank(contract)) {
+      updateWrapper.eq("contract_addr", contract);
+    }
+    if (!StringUtils.isBlank(mainChainNew)){
+      updateWrapper.set("main_chain", mainChainNew);
+    }
+    if (!StringUtils.isBlank(coinNameNew)){
+      updateWrapper.set("coin_name", coinNameNew);
+    }
+    if (!StringUtils.isBlank(contractNew)){
+      updateWrapper.set("contract_addr", contractNew);
+    }
+    if (pointNew != null){
+      updateWrapper.set("point", pointNew);
+    }
+    return this.update(updateWrapper);
   }
 }

@@ -19,13 +19,9 @@ import java.util.List;
 @Mapper
 public interface TransRuleMapper extends BaseMapper<TransRuleVO> {
 
-//  @Select("select a.*, b.name " +
-//      "from trans_rule a join user b " +
-//      "on a.user_id = b.id where a.user_id = #{id} ")
-//  List<TransRule> selectByUserId(IPage page, String id);
-
   @Select("select a.*, b.name " +
       "from trans_rule a join user b " +
       "on a.user_id = b.id ")
   IPage<TransRuleVO> selectAll(@Nullable Wrapper wrapper, IPage page);
+
 }

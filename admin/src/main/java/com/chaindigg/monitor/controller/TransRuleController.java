@@ -3,6 +3,7 @@ package com.chaindigg.monitor.controller;
 
 import com.chaindigg.monitor.entity.TransRule;
 import com.chaindigg.monitor.service.ITransRuleService;
+import com.chaindigg.monitor.utils.ApiResponse;
 import com.chaindigg.monitor.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -25,8 +26,14 @@ public class TransRuleController {
   private final ITransRuleService transRuleService;
 
   @GetMapping("/transaction-rules")
-  public List<TransRuleVO> getAllRules(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
-    return transRuleService.selectAll(coin, userName, userId,currentPage, pageSize);
+  public ApiResponse<TransRuleVO> getAllRules(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
+    ApiResponse apiResponse = new ApiResponse();
+    try {
+      return apiResponse.success(transRuleService.selectAll(coin, userName, userId,currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return apiResponse.fail();
+    }
   }
 
 }

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   }
 
   @Override
-  public Boolean add(User... user) {
-    return this.saveBatch(Arrays.asList(user));
+  public Boolean add(String name, String phone, String email, String remark) {
+    User user = new User();
+    user.setName(name)
+        .setPhone(phone)
+        .setEmail(email)
+        .setRemark(remark)
+        .setCreateTime(LocalDateTime.now())
+        .setUpdateTime(LocalDateTime.now())
+        .setState(1);
+    return this.save(user);
   }
+
 }

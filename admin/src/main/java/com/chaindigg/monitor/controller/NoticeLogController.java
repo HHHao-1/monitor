@@ -1,6 +1,7 @@
 package com.chaindigg.monitor.controller;
 
 
+import com.chaindigg.monitor.utils.ApiResponse;
 import com.chaindigg.monitor.vo.NoticeLogVO;
 import com.chaindigg.monitor.service.INoticeLogService;
 import lombok.RequiredArgsConstructor;
@@ -24,19 +25,37 @@ public class NoticeLogController {
 
 
   @GetMapping("/notice-logs/addresses")
-  public List<NoticeLogVO> getAddrNoticeLogs(String eventName, String coinKind, int currentPage, int pageSize) {
-    return noticeLogService.selectAddrAll(eventName, coinKind, currentPage, pageSize);
+  public ApiResponse<NoticeLogVO> getAddrNoticeLogs(String eventName, String coinKind, int currentPage, int pageSize) {
+    ApiResponse apiResponse = new ApiResponse();
+    try {
+      return apiResponse.success(noticeLogService.selectAddrAll(eventName, coinKind, currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return apiResponse.fail();
+    }
   }
 
 
 
   @GetMapping("/notice-logs/transactions")
-  public List<NoticeLogVO> getTransNoticeLogs(String coinKind, int currentPage, int pageSize) {
-    return noticeLogService.selectTransAll(coinKind, currentPage, pageSize);
+  public ApiResponse<NoticeLogVO> getTransNoticeLogs(String coinKind, int currentPage, int pageSize) {
+    ApiResponse apiResponse = new ApiResponse();
+    try {
+      return apiResponse.success(noticeLogService.selectTransAll(coinKind, currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return apiResponse.fail();
+    }
   }
 
   @GetMapping("/notice-logs")
-  public List<NoticeLogVO> getLogs(@Nullable String monitorType, @Nullable String eventName, @Nullable String coinKind, int currentPage, int pageSize) {
-    return noticeLogService.selectAll(monitorType, eventName, coinKind, currentPage, pageSize);
+  public ApiResponse<NoticeLogVO> getLogs(@Nullable String monitorType, @Nullable String eventName, @Nullable String coinKind, int currentPage, int pageSize) {
+    ApiResponse apiResponse = new ApiResponse();
+    try {
+      return apiResponse.success(noticeLogService.selectAll(monitorType, eventName, coinKind, currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return apiResponse.fail();
+    }
   }
 }

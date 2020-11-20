@@ -17,4 +17,12 @@ import java.util.List;
 public interface ICoinKindService extends IService<CoinKind> {
 
   List<CoinKind> selectAll(@Nullable String mainChain, @Nullable String coinName, int currentPage, int pageSize);
+
+  Boolean add(String mainChain, String coinName, String contract, Integer point);
+
+  Boolean delete(String mainChain, @Nullable String coinName, @Nullable String contract, Integer point);
+
+  Boolean update(String mainChain, @Nullable String coinName, @Nullable String contract, Integer point, @Nullable String mainChainNew,
+                 @Nullable String coinNameNew,
+                 @Nullable String contractNew, @Nullable Integer pointNew);
 }

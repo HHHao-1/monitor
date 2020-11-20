@@ -1,8 +1,6 @@
 package com.chaindigg.monitor.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -43,6 +42,14 @@ public class CoinKind implements Serializable {
 
   @ApiModelProperty(value = "小数位")
   private Integer point;
+
+  @ApiModelProperty(value = "创建时间")
+  @TableField(fill = FieldFill.INSERT)
+  private LocalDateTime createTime;
+
+  @ApiModelProperty(value = "修改时间")
+  @TableField(fill = FieldFill.INSERT_UPDATE)
+  private LocalDateTime updateTime;
 
 
 }

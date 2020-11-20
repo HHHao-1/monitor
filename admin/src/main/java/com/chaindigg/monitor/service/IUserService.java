@@ -18,5 +18,7 @@ public interface IUserService extends IService<User> {
 
   List<User> selectAll(@Nullable String name, int currentPage, int pageSize);
 
-  Boolean add(User... user);
+  Boolean add(String name, String phone, String email, String remark);
+
+
 }

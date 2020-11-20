@@ -31,14 +31,14 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRuleVO>
     IPage<AddrRuleVO> page = new Page<AddrRuleVO>(currentPage, pageSize);
     QueryWrapper<AddrRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if(!StringUtils.isBlank(userId)){
+    if (!StringUtils.isBlank(userId)){
       queryWrapper.eq("user_id",userId);
-    }else if(!StringUtils.isBlank(userName)&& !StringUtils.isBlank(event)){
-      queryWrapper.eq("event_name",event).eq("name",userName);
-    }else if (!StringUtils.isBlank(event) && StringUtils.isBlank(userName)){
-      queryWrapper.eq("event_name",event);
-    }else if(StringUtils.isBlank(event) && !StringUtils.isBlank(userName)){
+    }
+    if (!StringUtils.isBlank(userName)){
       queryWrapper.eq("name",userName);
+    }
+    if (!StringUtils.isBlank(event)){
+      queryWrapper.eq("event_name", event);
     }
     return this.baseMapper.selectAll(queryWrapper, page).getRecords();
   }
