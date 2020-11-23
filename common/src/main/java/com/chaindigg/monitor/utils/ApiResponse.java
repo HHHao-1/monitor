@@ -25,7 +25,7 @@ public class ApiResponse {
   //    return this;
   //  }
 
-  public static ApiResponse success(Object t, State s) {
+  private static ApiResponse success(Object t, State s) {
     ApiResponse apiResponse = new ApiResponse();
     apiResponse.isok = true;
     apiResponse.code = s.code;
@@ -34,7 +34,7 @@ public class ApiResponse {
     return apiResponse;
   }
 
-  public static ApiResponse fail(State s) {
+  private static ApiResponse fail(State s) {
     ApiResponse apiResponse = new ApiResponse();
     apiResponse.isok = false;
     apiResponse.code = s.code;

@@ -7,9 +7,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="common" />
         <module name="user-aipi" />
         <module name="admin" />
+        <module name="common" />
+      </profile>
+      <profile name="Annotation profile for monitor" enabled="true">
+        <sourceOutputDir name="../user-aipi/target/generated-sources/annotations" />
+        <sourceTestOutputDir name="../user-aipi/target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="user-api" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8">
@@ -17,6 +23,7 @@
       <module name="common" target="1.8" />
       <module name="monitor" target="1.8" />
       <module name="user-aipi" target="1.8" />
+      <module name="user-api" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -25,6 +32,7 @@
       <module name="common" options="-parameters" />
       <module name="monitor" options="-parameters" />
       <module name="user-aipi" options="-parameters" />
+      <module name="user-api" options="-parameters" />
     </option>
   </component>
 </project>
