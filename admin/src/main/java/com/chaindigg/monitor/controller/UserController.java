@@ -1,6 +1,7 @@
 package com.chaindigg.monitor.controller;
 
 import com.chaindigg.monitor.entity.User;
+import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.service.IUserService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,51 +20,49 @@ public class UserController {
   private final IUserService userService;
 
   @GetMapping("/users")
-  public ApiResponse<User> getUsers(@Nullable String name, int currentPage, int pageSize) {
-    ApiResponse apiResponse = new ApiResponse();
+  public ApiResponse getUsers(@Nullable String name, int currentPage, int pageSize) {
     try {
-      return apiResponse.response(userService.selectAll(name, currentPage, pageSize));
+      return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
-      return apiResponse.fail();
+      return ApiResponse.create(State.FAIL);
     }
   }
 
   @PostMapping("/users")
-  public ApiResponse<Boolean> addUsers(String name, String phone, String email, String remark) {
-    ApiResponse apiResponse = new ApiResponse();
+  public ApiResponse addUsers(String name, String phone, String email, String remark) {
+
     try {
-      return apiResponse.response(userService.add(name, phone, email, remark));
+      return ApiResponse.create(State.SUCCESS, userService.add(name, phone, email, remark));
     } catch (Exception e) {
       e.printStackTrace();
-      return apiResponse.fail();
+      return ApiResponse.create(State.FAIL);
     }
   }
 
   @DeleteMapping("/users")
-  public ApiResponse<Boolean> deleteUser(Integer id) {
-    ApiResponse apiResponse = new ApiResponse();
+  public ApiResponse deleteUser(Integer id) {
     try {
-      return apiResponse.response(userService.delete(id));
+      return ApiResponse.create(State.SUCCESS, userService.delete(id),State.SUCCESS);
     } catch (Exception e) {
       e.printStackTrace();
-      return apiResponse.fail();
+      return ApiResponse.create(State.FAIL);
     }
   }
 
   @PutMapping("/users")
-  public ApiResponse<Boolean> updateUser(
+  public ApiResponse updateUser(
       Integer id,
       @Nullable String name,
       @Nullable String phone,
       @Nullable String email,
       @Nullable String remark) {
-    ApiResponse apiResponse = new ApiResponse();
+
     try {
-      return apiResponse.response(userService.update(id, name, phone, email, remark));
+      return ApiResponse.create(State.SUCCESS, userService.update(id, name, phone, email, remark));
     } catch (Exception e) {
       e.printStackTrace();
-      return apiResponse.fail();
+      return ApiResponse.create(State.FAIL);
     }
   }
 }

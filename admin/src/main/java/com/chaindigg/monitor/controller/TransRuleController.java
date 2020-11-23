@@ -47,7 +47,7 @@ public class TransRuleController {
       return null;
     } catch (Exception e) {
       e.printStackTrace();
-      return ApiResponse.fail(State.FAIL);
+      return ApiResponse.create(State.FAIL);
     }
   }
 }
