@@ -28,15 +28,15 @@ public class AddrRuleVOServiceImpl extends ServiceImpl<AddrRuleVOMapper, AddrRul
       String event, String userName, String userId, int currentPage, int pageSize) {
     IPage<AddrRuleVO> page = new Page<AddrRuleVO>(currentPage, pageSize);
     QueryWrapper<AddrRuleVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
+    queryWrapper.orderByDesc("a.id");
     if (!StringUtils.isBlank(userId)) {
-      queryWrapper.eq("user_id", userId);
+      queryWrapper.eq("a.user_id", userId);
     }
     if (!StringUtils.isBlank(userName)) {
-      queryWrapper.eq("name", userName);
+      queryWrapper.eq("b.name", userName);
     }
     if (!StringUtils.isBlank(event)) {
-      queryWrapper.eq("event_name", event);
+      queryWrapper.eq("a.event_name", event);
     }
     return this.baseMapper.selectAll(queryWrapper, page).getRecords();
   }

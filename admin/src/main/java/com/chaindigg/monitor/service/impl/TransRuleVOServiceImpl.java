@@ -28,15 +28,15 @@ public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, Trans
       String coin, String userName, String userId, int currentPage, int pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
+    queryWrapper.orderByDesc("a.id");
     if (!StringUtils.isBlank(userId)) {
-      queryWrapper.eq("user_id", userId);
+      queryWrapper.eq("a.user_id", userId);
     }
     if (!StringUtils.isBlank(userName)) {
-      queryWrapper.eq("name", userName);
+      queryWrapper.eq("b.name", userName);
     }
     if (!StringUtils.isBlank(coin)) {
-      queryWrapper.eq("coin_kind", coin);
+      queryWrapper.eq("a.coin_kind", coin);
     }
     return this.baseMapper.selectAll(queryWrapper, page).getRecords();
   }
