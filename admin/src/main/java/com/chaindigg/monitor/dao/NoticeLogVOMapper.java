@@ -13,7 +13,7 @@ import org.springframework.lang.Nullable;
 import java.util.List;
 
 @Mapper
-public interface NoticeLogMapper extends BaseMapper<NoticeLogVO> {
+public interface NoticeLogVOMapper extends BaseMapper<NoticeLogVO> {
 
   @Select("select a.coin_kind, a.notice_way, b.notice_time, c.name " +
       "from trans_rule a join monitor_trans b " +

@@ -5,10 +5,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.chaindigg.monitor.dao.TransRuleMapper;
-import com.chaindigg.monitor.entity.TransRule;
-import com.chaindigg.monitor.service.ITransRuleService;
-import com.chaindigg.monitor.vo.AddrRuleVO;
+import com.chaindigg.monitor.dao.TransRuleVOMapper;
+import com.chaindigg.monitor.service.ITransRuleVOService;
 import com.chaindigg.monitor.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -26,7 +24,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRuleVO> implements ITransRuleService {
+public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, TransRuleVO> implements ITransRuleVOService {
 
   public List<TransRuleVO> selectAll(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);

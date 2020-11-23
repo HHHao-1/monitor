@@ -1,17 +1,13 @@
 package com.chaindigg.monitor.controller;
 
-
-import com.chaindigg.monitor.entity.TransRule;
-import com.chaindigg.monitor.service.ITransRuleService;
+import com.chaindigg.monitor.enums.State;
+import com.chaindigg.monitor.service.ITransRuleVOService;
 import com.chaindigg.monitor.utils.ApiResponse;
-import com.chaindigg.monitor.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 服务控制器
@@ -19,21 +15,39 @@ import java.util.List;
  * @author chenghao
  * @since 2020-11-16 17:40:50
  */
-
 @RequiredArgsConstructor
 @RestController
 public class TransRuleController {
-  private final ITransRuleService transRuleService;
+  private final ITransRuleVOService transRuleService;
 
   @GetMapping("/transaction-rules")
-  public ApiResponse<TransRuleVO> getAllRules(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
-    ApiResponse apiResponse = new ApiResponse();
+  public ApiResponse getAllRules(
+      @Nullable String coin,
+      @Nullable String userName,
+      @Nullable String userId,
+      int currentPage,
+      int pageSize) {
     try {
-      return apiResponse.success(transRuleService.selectAll(coin, userName, userId,currentPage, pageSize));
+      return ApiResponse.create(
+          State.SUCCESS, transRuleService.selectAll(coin, userName, userId, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
-      return apiResponse.fail();
+      return ApiResponse.create(State.FAIL);
     }
   }
 
+  @PostMapping("/transaction-rules")
+  public ApiResponse addAllRules(
+      @Nullable String coin,
+      @Nullable String userName,
+      @Nullable String userId,
+      int currentPage,
+      int pageSize) {
+    try {
+      return null;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.fail(State.FAIL);
+    }
+  }
 }

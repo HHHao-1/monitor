@@ -6,9 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.chaindigg.monitor.dao.NoticeLogMapper;
-import com.chaindigg.monitor.entity.TransRule;
-import com.chaindigg.monitor.entity.User;
+import com.chaindigg.monitor.dao.NoticeLogVOMapper;
 import com.chaindigg.monitor.vo.NoticeLogVO;
 import com.chaindigg.monitor.service.INoticeLogService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogMapper, NoticeLogVO> implements INoticeLogService {
+public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeLogVO> implements INoticeLogService {
 
   @Override
   public List<NoticeLogVO> selectAddrAll(@Nullable String eventName, @Nullable String coinKind, int currentPage, int pageSize) {

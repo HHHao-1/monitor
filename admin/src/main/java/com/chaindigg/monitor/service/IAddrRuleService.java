@@ -1,20 +1,21 @@
 package com.chaindigg.monitor.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.chaindigg.monitor.entity.AddrRule;
+import com.chaindigg.monitor.exception.DataBaseException;
 import com.chaindigg.monitor.vo.AddrRuleVO;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-/**
- * <p>
- * 服务类
- * </p>
- *
- * @author chenghao
- * @since 2020-11-17
- */
-public interface IAddrRuleService extends IService<AddrRuleVO> {
+public interface IAddrRuleService extends IService<AddrRule> {
 
-  List<AddrRuleVO> selectAll(@Nullable String event, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize);
+  Boolean add(List<Map<String, Object>> list) throws DataBaseException;
+
+  Boolean delete(String userName, String eventName, LocalDateTime AddTime);
+
+//  String update();
+
 }

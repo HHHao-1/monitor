@@ -17,7 +17,7 @@ import java.util.List;
  * @since 2020-11-16 17:40:50
  */
 @Mapper
-public interface TransRuleMapper extends BaseMapper<TransRuleVO> {
+public interface TransRuleVOMapper extends BaseMapper<TransRuleVO> {
 
   @Select("select a.*, b.name " +
       "from trans_rule a join user b " +

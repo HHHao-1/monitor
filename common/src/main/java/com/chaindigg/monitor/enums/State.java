@@ -1,11 +1,12 @@
 package com.chaindigg.monitor.enums;
 
-public enum StatusCode {
-  //状态码
+public enum State {
+  // 状态码
+  FAIL(0, "请求失败"),
   SUCCESS(1, "请求成功"),
-  FAIL(0, "请求失败");
+  USER_NOT_EXIST(2, "用户不存在");
 
-  StatusCode(int code, String message) {
+  State(int code, String message) {
     this.code = code;
     this.message = message;
   }

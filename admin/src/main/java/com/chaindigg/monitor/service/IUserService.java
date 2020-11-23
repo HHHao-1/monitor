@@ -20,5 +20,8 @@ public interface IUserService extends IService<User> {
 
   Boolean add(String name, String phone, String email, String remark);
 
+  Boolean delete(Integer id);
+
+  Boolean update(Integer id, @Nullable String name, @Nullable String phone, @Nullable String email, @Nullable String remark);
 
 }

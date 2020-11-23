@@ -1,45 +1,87 @@
 package com.chaindigg.monitor.service.impl;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chaindigg.monitor.dao.AddrRuleMapper;
+import com.chaindigg.monitor.dao.UserMapper;
+import com.chaindigg.monitor.entity.AddrRule;
+import com.chaindigg.monitor.entity.User;
+import com.chaindigg.monitor.enums.ResponseMSG;
+import com.chaindigg.monitor.exception.DataBaseException;
 import com.chaindigg.monitor.service.IAddrRuleService;
-import com.chaindigg.monitor.vo.AddrRuleVO;
+import com.chaindigg.monitor.utils.SearchNoticeWay;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/**
- * <p>
- * 服务实现类
- * </p>
- *
- * @author chenghao
- * @since 2020-11-17
- */
 @Service
 @RequiredArgsConstructor
-public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRuleVO> implements IAddrRuleService {
+public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule> implements IAddrRuleService {
 
-  public List<AddrRuleVO> selectAll(@Nullable String event, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
-    IPage<AddrRuleVO> page = new Page<AddrRuleVO>(currentPage, pageSize);
-    QueryWrapper<AddrRuleVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
-    if (!StringUtils.isBlank(userId)){
-      queryWrapper.eq("user_id",userId);
-    }
-    if (!StringUtils.isBlank(userName)){
-      queryWrapper.eq("name",userName);
-    }
-    if (!StringUtils.isBlank(event)){
-      queryWrapper.eq("event_name", event);
-    }
-    return this.baseMapper.selectAll(queryWrapper, page).getRecords();
+  private final UserMapper userMapper;
+  private final AddrRuleMapper addrRuleMapper;
+
+  public Integer searchUserId(String name) {
+    QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+    userQueryWrapper.select("id");
+    return userMapper.selectOne(userQueryWrapper).getId();
   }
+
+
+  @Override
+  public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
+    Integer id = searchUserId(list.get(0).get("userName").toString());
+    if (id != null) {
+      List<AddrRule> listSave = new ArrayList<>();
+      list.stream()
+          .forEach(e -> {
+            AddrRule addrRule = new AddrRule();
+            addrRule.setEventName(e.get("eventName").toString())
+                .setCoinKind(e.get("coinKind").toString())
+                .setAddress(e.get("address").toString())
+                .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
+                .setMonitorMinVal(e.get("monitorMinVal").toString())
+                .setAddressMark(e.get("addressMark").toString())
+                .setUserId(Integer.parseInt(e.get("id").toString()))
+                .setState(1)
+                .setEventAddTime(LocalDateTime.now())
+                .setEventUpdateTime(LocalDateTime.now());
+            listSave.add(addrRule);
+          });
+      return this.saveBatch(listSave);
+    }else {
+      throw new DataBaseException(ResponseMSG.USER_NOT_EXIST.message);
+    }
+  }
+
+  public Integer addrRuleState(String userName, String eventName, LocalDateTime addTime) {
+    QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
+    queryWrapper.select("state").eq("id", userName).eq("event_name", eventName).eq("event_add_time", addTime);
+    return addrRuleMapper.selectOne(queryWrapper).getState();
+  }
+
+  @Override
+  public Boolean delete(String userName, String eventName, LocalDateTime addTime) {
+    Integer state = addrRuleState(userName, eventName, addTime);
+    Integer id = searchUserId(userName);
+    UpdateWrapper<AddrRule> queryWrapper = new UpdateWrapper<>();
+    queryWrapper.eq("id", userName).eq("event_name", eventName).eq("event_add_time", addTime);
+    if (state == 0) {
+      queryWrapper.set("state", 1);
+    } else if (state == 1) {
+      queryWrapper.set("state", 0);
+    }
+    return this.update(queryWrapper);
+  }
+
+//  @Override
+//  public String update() {
+//    return null;
+//  }
+
 }

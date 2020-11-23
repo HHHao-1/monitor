@@ -15,7 +15,7 @@ import java.util.List;
  * @author chenghao
  * @since 2020-11-17
  */
-public interface ITransRuleService extends IService<TransRuleVO> {
+public interface ITransRuleVOService extends IService<TransRuleVO> {
 
   List<TransRuleVO> selectAll(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize);
 }

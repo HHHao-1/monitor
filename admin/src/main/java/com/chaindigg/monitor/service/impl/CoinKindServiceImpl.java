@@ -74,20 +74,25 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind> i
     updateWrapper.eq("main_chain", mainChain).eq("point", point);
     if (!StringUtils.isBlank(coinName)){
       updateWrapper.eq("coin_name", coinName);
-    }if (!StringUtils.isBlank(contract)) {
+    }
+    if (!StringUtils.isBlank(contract)) {
       updateWrapper.eq("contract_addr", contract);
     }
     if (!StringUtils.isBlank(mainChainNew)){
       updateWrapper.set("main_chain", mainChainNew);
+      updateWrapper.set("update_time", LocalDateTime.now());
     }
     if (!StringUtils.isBlank(coinNameNew)){
       updateWrapper.set("coin_name", coinNameNew);
+      updateWrapper.set("update_time", LocalDateTime.now());
     }
     if (!StringUtils.isBlank(contractNew)){
       updateWrapper.set("contract_addr", contractNew);
+      updateWrapper.set("update_time", LocalDateTime.now());
     }
     if (pointNew != null){
       updateWrapper.set("point", pointNew);
+      updateWrapper.set("update_time", LocalDateTime.now());
     }
     return this.update(updateWrapper);
   }
