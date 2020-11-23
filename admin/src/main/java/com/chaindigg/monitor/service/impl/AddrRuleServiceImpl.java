@@ -7,7 +7,7 @@ import com.chaindigg.monitor.dao.AddrRuleMapper;
 import com.chaindigg.monitor.dao.UserMapper;
 import com.chaindigg.monitor.entity.AddrRule;
 import com.chaindigg.monitor.entity.User;
-import com.chaindigg.monitor.enums.ResponseMSG;
+import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.exception.DataBaseException;
 import com.chaindigg.monitor.service.IAddrRuleService;
 import com.chaindigg.monitor.utils.SearchNoticeWay;
@@ -33,31 +33,36 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
     return userMapper.selectOne(userQueryWrapper).getId();
   }
 
+  private List<AddrRule> addrRuleList(List<Map<String, Object>> list) {
+    List<AddrRule> listSave = new ArrayList<>();
+    list.stream()
+        .forEach(
+            e -> {
+              AddrRule addrRule = new AddrRule();
+              addrRule
+                  .setEventName(e.get("eventName").toString())
+                  .setCoinKind(e.get("coinKind").toString())
+                  .setAddress(e.get("address").toString())
+                  .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
+                  .setMonitorMinVal(e.get("monitorMinVal").toString())
+                  .setAddressMark(e.get("addressMark").toString())
+                  .setUserId(Integer.parseInt(e.get("id").toString()))
+                  .setState(1)
+                  .setEventAddTime(LocalDateTime.now())
+                  .setEventUpdateTime(LocalDateTime.now());
+              listSave.add(addrRule);
+            });
+    return listSave;
+  }
+
   @Override
   public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());
     if (id != null) {
-      List<AddrRule> listSave = new ArrayList<>();
-      list.stream()
-          .forEach(
-              e -> {
-                AddrRule addrRule = new AddrRule();
-                addrRule
-                    .setEventName(e.get("eventName").toString())
-                    .setCoinKind(e.get("coinKind").toString())
-                    .setAddress(e.get("address").toString())
-                    .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
-                    .setMonitorMinVal(e.get("monitorMinVal").toString())
-                    .setAddressMark(e.get("addressMark").toString())
-                    .setUserId(Integer.parseInt(e.get("id").toString()))
-                    .setState(1)
-                    .setEventAddTime(LocalDateTime.now())
-                    .setEventUpdateTime(LocalDateTime.now());
-                listSave.add(addrRule);
-              });
+      List<AddrRule> listSave = addrRuleList(list);
       return this.saveBatch(listSave);
     } else {
-      throw new DataBaseException(ResponseMSG.USER_NOT_EXIST.message);
+      throw new DataBaseException(State.USER_NOT_EXIST);
     }
   }
 
@@ -86,7 +91,13 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
   }
 
   @Override
-  public Boolean update(List<Map<String, Object>> list) {
-    return null;
+  public Boolean update(List<Map<String, Object>> list) throws DataBaseException {
+    Integer id = searchUserId(list.get(0).get("userName").toString());
+    if (id != null) {
+      List<AddrRule> listSave = addrRuleList(list);
+      return this.updateBatchById(listSave);
+    } else {
+      throw new DataBaseException(State.USER_NOT_EXIST);
+    }
   }
 }

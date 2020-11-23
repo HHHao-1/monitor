@@ -9,13 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="user-aipi" />
         <module name="admin" />
-        <module name="common" />
-      </profile>
-      <profile name="Annotation profile for monitor" enabled="true">
-        <sourceOutputDir name="../user-aipi/target/generated-sources/annotations" />
-        <sourceTestOutputDir name="../user-aipi/target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
         <module name="user-api" />
+        <module name="common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8">

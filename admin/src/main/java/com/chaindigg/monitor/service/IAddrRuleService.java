@@ -14,5 +14,5 @@ public interface IAddrRuleService extends IService<AddrRule> {
 
   Boolean delete(String userName, String eventName, LocalDateTime AddTime);
 
-  Boolean update(List<Map<String, Object>> list);
+  Boolean update(List<Map<String, Object>> list) throws DataBaseException;
 }

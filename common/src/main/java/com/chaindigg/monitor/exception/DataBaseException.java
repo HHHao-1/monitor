@@ -1,12 +1,14 @@
 package com.chaindigg.monitor.exception;
 
+import com.chaindigg.monitor.enums.State;
+
 public class DataBaseException extends Exception {
-  private String message;
+  public State state;
 
   public DataBaseException() {}
 
-  public DataBaseException(String message) {
-    super(message);
-    this.message = message;
+  public DataBaseException(State state) {
+    super(state.message);
+    this.state = state;
   }
 }

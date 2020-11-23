@@ -17,7 +17,7 @@
     <modules>
         <module>common</module>
         <module>admin</module>
-        <module>user-aipi</module>
+        <module>user-api</module>
     </modules>
 
     <properties>
@@ -85,11 +85,11 @@
             <artifactId>knife4j-spring-boot-starter</artifactId>
             <version>3.0.1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-lang3</artifactId>-->
-<!--            <version>3.11</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.commons</groupId>-->
+        <!--            <artifactId>commons-lang3</artifactId>-->
+        <!--            <version>3.11</version>-->
+        <!--        </dependency>-->
     </dependencies>
 
 </project>

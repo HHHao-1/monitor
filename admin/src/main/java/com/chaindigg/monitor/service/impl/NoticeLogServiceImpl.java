@@ -37,7 +37,8 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("coin_kind", coinKind);
     }
-    return this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
+    List<NoticeLogVO> A = this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
+    return A;
   }
 
   @Override

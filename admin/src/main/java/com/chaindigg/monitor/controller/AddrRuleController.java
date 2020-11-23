@@ -1,11 +1,16 @@
 package com.chaindigg.monitor.controller;
 
 import com.chaindigg.monitor.enums.State;
+import com.chaindigg.monitor.exception.DataBaseException;
+import com.chaindigg.monitor.service.IAddrRuleService;
 import com.chaindigg.monitor.service.IAddrRuleVOService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 服务控制器
@@ -16,14 +21,53 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 public class AddrRuleController {
-  private final IAddrRuleVOService addrRuleService;
+  private final IAddrRuleVOService addrRuleVOService;
+  private final IAddrRuleService addrRuleService;
 
   @GetMapping("/addr-rules")
-  public ApiResponse getAllRulesList(
+  public ApiResponse getAllRules(
       String event, String userName, String userId, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
-          State.SUCCESS, addrRuleService.selectAll(event, userName, userId, currentPage, pageSize));
+          State.SUCCESS,
+          addrRuleVOService.selectAll(event, userName, userId, currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+
+  @PostMapping("/addr-rules")
+  public ApiResponse addAllAddrRules(List<Map<String, Object>> list) {
+    try {
+      return ApiResponse.create(State.SUCCESS, addrRuleService.add(list));
+    } catch (DataBaseException e) {
+      e.printStackTrace();
+      return ApiResponse.create(e.state);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+
+  @DeleteMapping("/addr-rules")
+  public ApiResponse deleteAllRules(String userName, String eventName, LocalDateTime AddTime) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, addrRuleService.delete(userName, eventName, AddTime));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+
+  @PutMapping("/addr-rules")
+  public ApiResponse updateAllRules(List<Map<String, Object>> list) {
+    try {
+      return ApiResponse.create(State.SUCCESS, addrRuleService.update(list));
+    } catch (DataBaseException e) {
+      e.printStackTrace();
+      return ApiResponse.create(e.state);
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);

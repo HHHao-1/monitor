@@ -1,12 +1,16 @@
 package com.chaindigg.monitor.controller;
 
 import com.chaindigg.monitor.enums.State;
+import com.chaindigg.monitor.exception.DataBaseException;
+import com.chaindigg.monitor.service.ITransRuleService;
 import com.chaindigg.monitor.service.ITransRuleVOService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 服务控制器
@@ -17,14 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 public class TransRuleController {
-  private final ITransRuleVOService transRuleService;
+  private final ITransRuleVOService transRuleVOService;
+  private final ITransRuleService transRuleService;
 
   @GetMapping("/transaction-rules")
-  public ApiResponse getAllRules(
+  public ApiResponse getTransRules(
       String coin, String userName, String userId, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
-          State.SUCCESS, transRuleService.selectAll(coin, userName, userId, currentPage, pageSize));
+          State.SUCCESS,
+          transRuleVOService.selectAll(coin, userName, userId, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);
@@ -32,10 +38,36 @@ public class TransRuleController {
   }
 
   @PostMapping("/transaction-rules")
-  public ApiResponse addAllRules(
-      String coin, String userName, String userId, int currentPage, int pageSize) {
+  public ApiResponse addAllTransRules(List<Map<String, Object>> list) {
     try {
-      return null;
+      return ApiResponse.create(State.SUCCESS, transRuleService.add(list));
+    } catch (DataBaseException e) {
+      e.printStackTrace();
+      return ApiResponse.create(e.state);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+
+  @DeleteMapping("/transaction-rules")
+  public ApiResponse deleteAllRules(String userName, String coinKind, LocalDateTime AddTime) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, transRuleService.delete(userName, coinKind, AddTime));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+
+  @PutMapping("/transaction-rules")
+  public ApiResponse updateAllRules(List<Map<String, Object>> list) {
+    try {
+      return ApiResponse.create(State.SUCCESS, transRuleService.update(list));
+    } catch (DataBaseException e) {
+      e.printStackTrace();
+      return ApiResponse.create(e.state);
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);
