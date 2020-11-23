@@ -4,7 +4,6 @@ import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.service.IAddrRuleVOService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +20,7 @@ public class AddrRuleController {
 
   @GetMapping("/addr-rules")
   public ApiResponse getAllRulesList(
-      @Nullable String event,
-      @Nullable String userName,
-      @Nullable String userId,
-      int currentPage,
-      int pageSize) {
+      String event, String userName, String userId, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, addrRuleService.selectAll(event, userName, userId, currentPage, pageSize));
@@ -33,6 +28,5 @@ public class AddrRuleController {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);
     }
-    //test
   }
 }

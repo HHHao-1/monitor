@@ -10,16 +10,13 @@ import com.chaindigg.monitor.dao.UserMapper;
 import com.chaindigg.monitor.entity.User;
 import com.chaindigg.monitor.service.IUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * <p>
  * 服务实现类
- * </p>
  *
  * @author chenghao
  * @since 2020-11-17
@@ -31,12 +28,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   private final UserMapper userMapper;
 
   @Override
-  public List<User> selectAll(@Nullable String name, int currentPage, int pageSize) {
+  public List<User> selectAll(String name, int currentPage, int pageSize) {
     IPage<User> page = new Page<User>(currentPage, pageSize);
     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if (!StringUtils.isBlank(name)){
-      queryWrapper.eq("name",name);
+    if (!StringUtils.isBlank(name)) {
+      queryWrapper.eq("name", name);
     }
     return this.page(page, queryWrapper).getRecords();
   }
@@ -64,11 +61,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   public Boolean delete(Integer id) {
     Integer state = userState(id);
     UpdateWrapper<User> queryWrapper = new UpdateWrapper<>();
-    queryWrapper.eq("id",id);
-    if (state == 0){
+    queryWrapper.eq("id", id);
+    if (state == 0) {
       queryWrapper.set("state", 1);
       queryWrapper.set("update_time", LocalDateTime.now());
-    }else if(state == 1){
+    } else if (state == 1) {
       queryWrapper.set("state", 0);
       queryWrapper.set("update_time", LocalDateTime.now());
     }
@@ -76,26 +73,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   }
 
   @Override
-  public Boolean update(Integer id, @Nullable String name, @Nullable String phone, @Nullable String email, @Nullable String remark) {
+  public Boolean update(Integer id, String name, String phone, String email, String remark) {
     UpdateWrapper<User> queryWrapper = new UpdateWrapper<>();
-    queryWrapper.eq("id",id);
-    if (!StringUtils.isBlank(name)){
+    queryWrapper.eq("id", id);
+    if (!StringUtils.isBlank(name)) {
       queryWrapper.set("name", name);
       queryWrapper.set("update_time", LocalDateTime.now());
     }
-    if (!StringUtils.isBlank(phone)){
+    if (!StringUtils.isBlank(phone)) {
       queryWrapper.set("phone", phone);
       queryWrapper.set("update_time", LocalDateTime.now());
     }
-    if (!StringUtils.isBlank(email)){
+    if (!StringUtils.isBlank(email)) {
       queryWrapper.set("email", email);
       queryWrapper.set("update_time", LocalDateTime.now());
     }
-    if (!StringUtils.isBlank(remark)){
+    if (!StringUtils.isBlank(remark)) {
       queryWrapper.set("remark", remark);
       queryWrapper.set("update_time", LocalDateTime.now());
     }
     return this.update(queryWrapper);
   }
-
 }

@@ -4,7 +4,6 @@ import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.service.ITransRuleVOService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +21,7 @@ public class TransRuleController {
 
   @GetMapping("/transaction-rules")
   public ApiResponse getAllRules(
-      @Nullable String coin,
-      @Nullable String userName,
-      @Nullable String userId,
-      int currentPage,
-      int pageSize) {
+      String coin, String userName, String userId, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, transRuleService.selectAll(coin, userName, userId, currentPage, pageSize));
@@ -38,11 +33,7 @@ public class TransRuleController {
 
   @PostMapping("/transaction-rules")
   public ApiResponse addAllRules(
-      @Nullable String coin,
-      @Nullable String userName,
-      @Nullable String userId,
-      int currentPage,
-      int pageSize) {
+      String coin, String userName, String userId, int currentPage, int pageSize) {
     try {
       return null;
     } catch (Exception e) {

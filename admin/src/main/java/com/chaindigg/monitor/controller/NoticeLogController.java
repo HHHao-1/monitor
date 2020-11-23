@@ -4,7 +4,6 @@ import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.service.INoticeLogService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,11 +44,7 @@ public class NoticeLogController {
 
   @GetMapping("/notice-logs")
   public ApiResponse getLogs(
-      @Nullable String monitorType,
-      @Nullable String eventName,
-      @Nullable String coinKind,
-      int currentPage,
-      int pageSize) {
+      String monitorType, String eventName, String coinKind, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,

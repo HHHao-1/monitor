@@ -9,35 +9,34 @@ import com.chaindigg.monitor.dao.TransRuleVOMapper;
 import com.chaindigg.monitor.service.ITransRuleVOService;
 import com.chaindigg.monitor.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * <p>
  * 服务实现类
- * </p>
  *
  * @author chenghao
  * @since 2020-11-17
  */
 @Service
 @RequiredArgsConstructor
-public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, TransRuleVO> implements ITransRuleVOService {
+public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, TransRuleVO>
+    implements ITransRuleVOService {
 
-  public List<TransRuleVO> selectAll(@Nullable String coin, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize) {
+  public List<TransRuleVO> selectAll(
+      String coin, String userName, String userId, int currentPage, int pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if(!StringUtils.isBlank(userId)) {
+    if (!StringUtils.isBlank(userId)) {
       queryWrapper.eq("user_id", userId);
     }
-    if (!StringUtils.isBlank(userName)){
-      queryWrapper.eq("name",userName);
+    if (!StringUtils.isBlank(userName)) {
+      queryWrapper.eq("name", userName);
     }
-    if (!StringUtils.isBlank(coin)){
-      queryWrapper.eq("coin_kind",coin);
+    if (!StringUtils.isBlank(coin)) {
+      queryWrapper.eq("coin_kind", coin);
     }
     return this.baseMapper.selectAll(queryWrapper, page).getRecords();
   }

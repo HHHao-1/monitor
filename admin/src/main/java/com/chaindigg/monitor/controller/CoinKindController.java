@@ -4,7 +4,6 @@ import com.chaindigg.monitor.enums.State;
 import com.chaindigg.monitor.service.ICoinKindService;
 import com.chaindigg.monitor.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,7 +19,7 @@ public class CoinKindController {
 
   @GetMapping("/coin-kinds")
   public ApiResponse getCoinKinds(
-      @Nullable String mainChain, @Nullable String coinName, int currentPage, int pageSize) {
+      String mainChain, String coinName, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, coinKindService.selectAll(mainChain, coinName, currentPage, pageSize));
@@ -32,7 +31,7 @@ public class CoinKindController {
 
   @PostMapping("/coin-kinds")
   public ApiResponse addCoinKind(
-      String mainChain, @Nullable String coinName, @Nullable String contract, Integer point) {
+      String mainChain, String coinName, String contract, Integer point) {
     try {
       return ApiResponse.create(
           State.SUCCESS, coinKindService.add(mainChain, coinName, contract, point));
@@ -44,7 +43,7 @@ public class CoinKindController {
 
   @DeleteMapping("/coin-kinds")
   public ApiResponse deleteCoinKind(
-      String mainChain, @Nullable String coinName, @Nullable String contract, Integer point) {
+      String mainChain, String coinName, String contract, Integer point) {
     try {
       return ApiResponse.create(
           State.SUCCESS, coinKindService.delete(mainChain, coinName, contract, point));
@@ -57,13 +56,13 @@ public class CoinKindController {
   @PutMapping("/coin-kinds")
   public ApiResponse updateCoinKind(
       String mainChain,
-      @Nullable String coinName,
-      @Nullable String contract,
+      String coinName,
+      String contract,
       Integer point,
-      @Nullable String mainChainNew,
-      @Nullable String coinNameNew,
-      @Nullable String contractNew,
-      @Nullable Integer pointNew) {
+      String mainChainNew,
+      String coinNameNew,
+      String contractNew,
+      Integer pointNew) {
     try {
       return ApiResponse.create(
           State.SUCCESS,

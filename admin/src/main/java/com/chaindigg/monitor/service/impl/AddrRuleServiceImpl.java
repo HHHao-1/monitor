@@ -21,7 +21,8 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule> implements IAddrRuleService {
+public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
+    implements IAddrRuleService {
 
   private final UserMapper userMapper;
   private final AddrRuleMapper addrRuleMapper;
@@ -32,36 +33,41 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule> i
     return userMapper.selectOne(userQueryWrapper).getId();
   }
 
-
   @Override
   public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());
     if (id != null) {
       List<AddrRule> listSave = new ArrayList<>();
       list.stream()
-          .forEach(e -> {
-            AddrRule addrRule = new AddrRule();
-            addrRule.setEventName(e.get("eventName").toString())
-                .setCoinKind(e.get("coinKind").toString())
-                .setAddress(e.get("address").toString())
-                .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
-                .setMonitorMinVal(e.get("monitorMinVal").toString())
-                .setAddressMark(e.get("addressMark").toString())
-                .setUserId(Integer.parseInt(e.get("id").toString()))
-                .setState(1)
-                .setEventAddTime(LocalDateTime.now())
-                .setEventUpdateTime(LocalDateTime.now());
-            listSave.add(addrRule);
-          });
+          .forEach(
+              e -> {
+                AddrRule addrRule = new AddrRule();
+                addrRule
+                    .setEventName(e.get("eventName").toString())
+                    .setCoinKind(e.get("coinKind").toString())
+                    .setAddress(e.get("address").toString())
+                    .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
+                    .setMonitorMinVal(e.get("monitorMinVal").toString())
+                    .setAddressMark(e.get("addressMark").toString())
+                    .setUserId(Integer.parseInt(e.get("id").toString()))
+                    .setState(1)
+                    .setEventAddTime(LocalDateTime.now())
+                    .setEventUpdateTime(LocalDateTime.now());
+                listSave.add(addrRule);
+              });
       return this.saveBatch(listSave);
-    }else {
+    } else {
       throw new DataBaseException(ResponseMSG.USER_NOT_EXIST.message);
     }
   }
 
   public Integer addrRuleState(String userName, String eventName, LocalDateTime addTime) {
     QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper.select("state").eq("id", userName).eq("event_name", eventName).eq("event_add_time", addTime);
+    queryWrapper
+        .select("state")
+        .eq("id", userName)
+        .eq("event_name", eventName)
+        .eq("event_add_time", addTime);
     return addrRuleMapper.selectOne(queryWrapper).getState();
   }
 
@@ -79,9 +85,8 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule> i
     return this.update(queryWrapper);
   }
 
-//  @Override
-//  public String update() {
-//    return null;
-//  }
-
+  @Override
+  public Boolean update(List<Map<String, Object>> list) {
+    return null;
+  }
 }

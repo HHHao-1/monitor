@@ -6,9 +6,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.chaindigg.monitor.vo.TransRuleVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import org.springframework.lang.Nullable;
-
-import java.util.List;
 
 /**
  * (trans_rule)数据Mapper
@@ -19,9 +16,6 @@ import java.util.List;
 @Mapper
 public interface TransRuleVOMapper extends BaseMapper<TransRuleVO> {
 
-  @Select("select a.*, b.name " +
-      "from trans_rule a join user b " +
-      "on a.user_id = b.id ")
-  IPage<TransRuleVO> selectAll(@Nullable Wrapper wrapper, IPage page);
-
+  @Select("select a.*, b.name " + "from trans_rule a join user b " + "on a.user_id = b.id ")
+  IPage<TransRuleVO> selectAll(Wrapper wrapper, IPage page);
 }

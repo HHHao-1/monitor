@@ -1,12 +1,12 @@
-//package com.chaindigg.monitor.service;
+// package com.chaindigg.monitor.service;
 //
-//import com.baomidou.mybatisplus.extension.service.IService;
-//import com.chaindigg.monitor.entity.AddrRule;
-//import org.springframework.lang.Nullable;
+// import com.baomidou.mybatisplus.extension.service.IService;
+// import com.chaindigg.monitor.entity.AddrRule;
+// import org.springframework.lang.Nullable;
 //
-//import java.util.List;
+// import java.util.List;
 //
-///**
+/// **
 // * <p>
 // * 服务类
 // * </p>
@@ -14,7 +14,8 @@
 // * @author chenghao
 // * @since 2020-11-17
 // */
-//public interface IAddrRuleService extends IService<AddrRule> {
+// public interface IAddrRuleService extends IService<AddrRule> {
 //
-//  List<AddrRule> selectAll(@Nullable String event, @Nullable String userName, @Nullable String userId, int currentPage, int pageSize);
-//}
+//  List<AddrRule> selectAll( String event,  String userName,  String userId, int currentPage, int
+// pageSize);
+// }
