@@ -30,24 +30,24 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       String eventName, String coinKind, int currentPage, int pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
+    // 自定义查询最好加上别名.字段，否则字段查询可能会找不到（模糊不清）
+    queryWrapper.orderByDesc("b.id");
     if ((!StringUtils.isBlank(eventName))) {
-      queryWrapper.eq("event_name", eventName);
+      queryWrapper.eq("a.event_name", eventName);
     }
     if (!StringUtils.isBlank(coinKind)) {
-      queryWrapper.eq("coin_kind", coinKind);
+      queryWrapper.eq("a.coin_kind", coinKind);
     }
-    List<NoticeLogVO> A = this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
-    return A;
+    return this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
   }
 
   @Override
   public List<NoticeLogVO> selectTransAll(String coinKind, int currentPage, int pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
+    queryWrapper.orderByDesc("b.id");
     if (!StringUtils.isBlank(coinKind)) {
-      queryWrapper.eq("coin_kind", coinKind);
+      queryWrapper.eq("a.coin_kind", coinKind);
     }
     return this.baseMapper.selectTransAll(queryWrapper, page).getRecords();
   }
@@ -57,64 +57,63 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       String monitorType, String eventName, String coinKind, int currentPage, int pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.orderByDesc("id");
+    queryWrapper.orderByDesc("b.id");
     if (!StringUtils.isBlank(monitorType)) {
       switch (monitorType) {
         case "addr":
           if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
-            selectAddrAll(eventName, null, currentPage, pageSize);
+            return selectAddrAll(eventName, null, currentPage, pageSize);
           } else if (!StringUtils.isBlank(coinKind) && StringUtils.isBlank(eventName)) {
-            selectAddrAll(null, coinKind, currentPage, pageSize);
+            return selectAddrAll(null, coinKind, currentPage, pageSize);
           } else if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
-            selectAddrAll(eventName, coinKind, currentPage, pageSize);
+            return selectAddrAll(eventName, coinKind, currentPage, pageSize);
           } else {
-            selectAddrAll(null, null, currentPage, pageSize);
+            return selectAddrAll(null, null, currentPage, pageSize);
           }
-          break;
         case "trans":
           if (!StringUtils.isBlank(coinKind)) {
-            selectTransAll(coinKind, currentPage, pageSize);
+            return selectTransAll(coinKind, currentPage, pageSize);
           } else {
-            selectTransAll(null, currentPage, pageSize);
+            return selectTransAll(null, currentPage, pageSize);
           }
+        default:
           break;
       }
-    } else {
-      // 这里要查全部，pageSize取long的最大值
-      page = new Page<NoticeLogVO>(0L, 9223372036854775807L);
-      List<NoticeLogVO> list = this.baseMapper.selectAddrAll(null, page).getRecords();
-      list.addAll(this.baseMapper.selectTransAll(null, page).getRecords());
-      list =
-          list.stream()
-              .sorted((p1, p2) -> p2.getNoticeTime().compareTo(p1.getNoticeTime()))
-              .collect(Collectors.toList());
-      int start = 0;
-      int end = 0;
-      if ((currentPage * pageSize) > list.size()) {
-        end = list.size();
-      } else {
-        start = (currentPage - 1) * pageSize;
-        end = currentPage * pageSize;
-      }
-      list = list.subList(start, end);
-      if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
-        List<NoticeLogVO> listquery =
-            list.stream()
-                .filter(e -> e.getEventName() == eventName)
-                .filter(e -> e.getCoinKind() == coinKind)
-                .collect(Collectors.toList());
-        return listquery;
-      } else if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
-        List<NoticeLogVO> listquery =
-            list.stream().filter(e -> e.getEventName() == eventName).collect(Collectors.toList());
-        return listquery;
-      } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
-        List<NoticeLogVO> listquery =
-            list.stream().filter(e -> e.getCoinKind() == coinKind).collect(Collectors.toList());
-        return listquery;
-      }
-      return list;
     }
-    return null;
+
+    // 这里要查全部，pageSize取long的最大值
+    page = new Page<NoticeLogVO>(0L, 9223372036854775807L);
+    List<NoticeLogVO> list = this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
+    list.addAll(this.baseMapper.selectTransAll(queryWrapper, page).getRecords());
+    list =
+        list.stream()
+            .sorted((p1, p2) -> p2.getNoticeTime().compareTo(p1.getNoticeTime()))
+            .collect(Collectors.toList());
+    int start = 0;
+    int end = 0;
+    if ((currentPage * pageSize) > list.size()) {
+      end = list.size();
+    } else {
+      start = (currentPage - 1) * pageSize;
+      end = currentPage * pageSize;
+    }
+    list = list.subList(start, end);
+    if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+      List<NoticeLogVO> listquery =
+          list.stream()
+              .filter(e -> e.getEventName() == eventName)
+              .filter(e -> e.getCoinKind() == coinKind)
+              .collect(Collectors.toList());
+      return listquery;
+    } else if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
+      List<NoticeLogVO> listquery =
+          list.stream().filter(e -> e.getEventName() == eventName).collect(Collectors.toList());
+      return listquery;
+    } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+      List<NoticeLogVO> listquery =
+          list.stream().filter(e -> e.getCoinKind() == coinKind).collect(Collectors.toList());
+      return listquery;
+    }
+    return list;
   }
 }

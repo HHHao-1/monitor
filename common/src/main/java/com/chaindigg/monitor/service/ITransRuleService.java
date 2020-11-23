@@ -10,6 +10,8 @@ import java.util.Map;
 
 public interface ITransRuleService extends IService<TransRule> {
 
+  List<TransRule> selectAllById(Integer id, int currentPage, int pageSize);
+
   Boolean add(List<Map<String, Object>> list) throws DataBaseException;
 
   Boolean delete(String userName, String coinKind, LocalDateTime AddTime);

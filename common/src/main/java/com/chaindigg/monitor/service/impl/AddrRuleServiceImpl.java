@@ -2,6 +2,8 @@ package com.chaindigg.monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chaindigg.monitor.dao.AddrRuleMapper;
 import com.chaindigg.monitor.dao.UserMapper;
@@ -53,6 +55,14 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
               listSave.add(addrRule);
             });
     return listSave;
+  }
+
+  @Override
+  public List<AddrRule> selectAllById(Integer id, int currentPage, int pageSize) {
+    IPage<AddrRule> page = new Page<AddrRule>(currentPage, pageSize);
+    QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("id", id);
+    return this.page(page, queryWrapper).getRecords();
   }
 
   @Override
