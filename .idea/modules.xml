@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/admin/admin.iml" filepath="$PROJECT_DIR$/admin/admin.iml" />
       <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/monitor.iml" filepath="$PROJECT_DIR$/monitor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/user-api/user-aipi.iml" filepath="$PROJECT_DIR$/user-api/user-aipi.iml" />
       <module fileurl="file://$PROJECT_DIR$/user-api/user-api.iml" filepath="$PROJECT_DIR$/user-api/user-api.iml" />
     </modules>
   </component>

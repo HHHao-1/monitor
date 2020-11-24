@@ -7,10 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="user-aipi" />
+        <module name="common" />
         <module name="admin" />
         <module name="user-api" />
-        <module name="common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8">
