@@ -43,7 +43,7 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
               TransRule transRule = new TransRule();
               transRule
                   .setCoinKind(e.get("eventName").toString())
-                  .setNoticeWay(SearchNoticeWay.noticeWayId(e.get("noticeWay").toString()))
+                  .setNoticeWay(SearchNoticeWay.noticeWayId((String) e.get("noticeWay")))
                   .setMonitorMinVal(e.get("monitorMinVal").toString())
                   .setUserId(Integer.parseInt(e.get("id").toString()))
                   .setState(1)
