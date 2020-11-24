@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoticeLogController {
   private final INoticeLogService noticeLogService;
 
-  @GetMapping("/notice-logs/addresses")
+  @GetMapping("/notice-logs/addr")
   public ApiResponse getAddrNoticeLogs(
       String eventName, String coinKind, int currentPage, int pageSize) {
     try {
@@ -31,7 +31,7 @@ public class NoticeLogController {
     }
   }
 
-  @GetMapping("/notice-logs/transactions")
+  @GetMapping("/notice-logs/trans")
   public ApiResponse getTransNoticeLogs(String coinKind, int currentPage, int pageSize) {
     try {
       return ApiResponse.create(

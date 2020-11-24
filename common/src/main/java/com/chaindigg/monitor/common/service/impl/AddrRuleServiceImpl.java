@@ -31,7 +31,7 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
 
   public Integer searchUserId(String name) {
     QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-    userQueryWrapper.select("id");
+    userQueryWrapper.select("id").eq("name", name);
     return userMapper.selectOne(userQueryWrapper).getId();
   }
 

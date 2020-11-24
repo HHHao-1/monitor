@@ -17,7 +17,7 @@
     <modules>
         <module>common</module>
         <module>admin</module>
-        <module>user-api</module>
+        <module>userapi</module>
     </modules>
 
     <properties>

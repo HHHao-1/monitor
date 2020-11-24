@@ -24,7 +24,7 @@ public class TransRuleController {
   private final ITransRuleVOService transRuleVOService;
   private final ITransRuleService transRuleService;
 
-  @GetMapping("/transaction-rules")
+  @GetMapping("/trans-rules")
   public ApiResponse getTransRules(
       String coin, String userName, String userId, int currentPage, int pageSize) {
     try {
@@ -37,7 +37,7 @@ public class TransRuleController {
     }
   }
 
-  @PostMapping("/transaction-rules")
+  @PostMapping("/trans-rules")
   public ApiResponse addAllTransRules(List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.add(list));
@@ -50,7 +50,7 @@ public class TransRuleController {
     }
   }
 
-  @DeleteMapping("/transaction-rules")
+  @DeleteMapping("/trans-rules")
   public ApiResponse deleteAllRules(String userName, String coinKind, LocalDateTime AddTime) {
     try {
       return ApiResponse.create(
@@ -61,7 +61,7 @@ public class TransRuleController {
     }
   }
 
-  @PutMapping("/transaction-rules")
+  @PutMapping("/trans-rules")
   public ApiResponse updateAllRules(List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.update(list));

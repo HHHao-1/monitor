@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 /** create：hao description: date: Created in 11:27 下午 2020/10/14 modified: */
 @Configuration
-@MapperScan("com.chaindigg.monitor.dao")
+@MapperScan({"com.chaindigg.monitor.*.dao"})
 public class MybatisPlusConfiguration {
 
   @Bean
