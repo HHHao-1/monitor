@@ -1,7 +1,6 @@
 package com.chaindigg.monitor.common.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,12 +17,10 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user")
-@ApiModel(value = "User对象", description = "")
 public class User implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @ApiModelProperty(value = "用户表")
   @TableId(value = "id", type = IdType.AUTO)
   private Integer id;
 

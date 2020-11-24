@@ -10,6 +10,8 @@ import java.util.Map;
 
 public interface IAddrRuleService extends IService<AddrRule> {
 
+  Integer searchUserId(String name);
+
   List<AddrRule> selectAllById(Integer id, int currentPage, int pageSize);
 
   Boolean add(List<Map<String, Object>> list) throws DataBaseException;

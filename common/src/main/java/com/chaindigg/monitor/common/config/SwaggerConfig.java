@@ -1,11 +1,8 @@
-package com.chaindigg.monitor.common.config; // package com.chaindigg.monitor.config;
+// package com.chaindigg.monitor.common.config;
 //
-// import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 // import io.swagger.annotations.ApiOperation;
 // import org.springframework.context.annotation.Bean;
 // import org.springframework.context.annotation.Configuration;
-// import org.springframework.context.annotation.Import;
-// import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 // import springfox.documentation.builders.ApiInfoBuilder;
 // import springfox.documentation.builders.PathSelectors;
 // import springfox.documentation.builders.RequestHandlerSelectors;
@@ -13,7 +10,6 @@ package com.chaindigg.monitor.common.config; // package com.chaindigg.monitor.co
 // import springfox.documentation.service.Contact;
 // import springfox.documentation.spi.DocumentationType;
 // import springfox.documentation.spring.web.plugins.Docket;
-// import springfox.documentation.swagger2.annotations.EnableSwagger2;
 //
 // @Configuration
 // public class SwaggerConfig {
@@ -36,5 +32,3 @@ package com.chaindigg.monitor.common.config; // package com.chaindigg.monitor.co
 //        .build();
 //  }
 // }
-//
-//

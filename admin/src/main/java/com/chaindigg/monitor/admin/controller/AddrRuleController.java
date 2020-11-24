@@ -24,6 +24,16 @@ public class AddrRuleController {
   private final IAddrRuleVOService addrRuleVOService;
   private final IAddrRuleService addrRuleService;
 
+  @GetMapping("/addr-rules/search")
+  public ApiResponse selectExist(String name) {
+    try {
+      return ApiResponse.create(State.SUCCESS, "用户id：" + addrRuleService.searchUserId(name));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.USER_NOT_EXIST);
+    }
+  }
+
   @GetMapping("/addr-rules")
   public ApiResponse getAllRules(
       String event, String userName, String userId, int currentPage, int pageSize) {
@@ -38,7 +48,7 @@ public class AddrRuleController {
   }
 
   @PostMapping("/addr-rules")
-  public ApiResponse addAllAddrRules(List<Map<String, Object>> list) {
+  public ApiResponse addAllAddrRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, addrRuleService.add(list));
     } catch (DataBaseException e) {

@@ -31,14 +31,13 @@ public class ApiResponse {
 
   public static ApiResponse create(State s, Object... t) {
     if (t.length != 0) {
-      if (t[0] instanceof Boolean) {
-        if (t.equals(true)) {
-          return success(t[0], s);
-        } else {
-          return fail(s);
-        }
-      }
       return success(t[0], s);
+    } else if (t[0] instanceof Boolean) {
+      if (t.equals(true)) {
+        return success(t[0], s);
+      } else {
+        return fail(s);
+      }
     } else {
       return fail(s);
     }
