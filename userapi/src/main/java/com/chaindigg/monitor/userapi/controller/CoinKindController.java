@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CoinKindController {
 
+  /**
+   * 服务控制器
+   *
+   * @author chenghao
+   * @since 2020-11-25 17:40:50
+   */
   private final ISearchCoinKindService searchCoinKindService;
 
   @GetMapping("/coinlist")
