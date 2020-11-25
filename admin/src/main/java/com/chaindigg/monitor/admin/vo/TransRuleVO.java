@@ -18,6 +18,8 @@ public class TransRuleVO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private Integer id;
+
   private String coinKind;
 
   private Integer userId;

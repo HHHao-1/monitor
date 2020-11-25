@@ -2,6 +2,7 @@ package com.chaindigg.monitor.admin.controller;
 
 import com.chaindigg.monitor.admin.service.ICoinKindService;
 import com.chaindigg.monitor.common.enums.State;
+import com.chaindigg.monitor.common.service.ISearchCoinKindService;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,18 @@ import java.util.List;
 @RestController
 public class CoinKindController {
   private final ICoinKindService coinKindService;
+
+  private final ISearchCoinKindService searchCoinKindService;
+
+  @GetMapping("/coinlist")
+  public ApiResponse getCoinList() {
+    try {
+      return ApiResponse.create(State.SUCCESS, searchCoinKindService.searchCoinKind());
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
 
   @GetMapping("/coin-kinds")
   public ApiResponse getCoinKinds(

@@ -8,7 +8,6 @@ import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -61,10 +60,9 @@ public class AddrRuleController {
   }
 
   @DeleteMapping("/addr-rules")
-  public ApiResponse deleteAllRules(String userName, String eventName, LocalDateTime AddTime) {
+  public ApiResponse deleteAllRules(Integer id) {
     try {
-      return ApiResponse.create(
-          State.SUCCESS, addrRuleService.delete(userName, eventName, AddTime));
+      return ApiResponse.create(State.SUCCESS, addrRuleService.delete(id));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);

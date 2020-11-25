@@ -73,22 +73,17 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
     }
   }
 
-  public Integer transRuleState(String userName, String coinKind, LocalDateTime addTime) {
+  public Integer transRuleState(Integer id) {
     QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper
-        .select("state")
-        .eq("id", userName)
-        .eq("event_name", coinKind)
-        .eq("event_add_time", addTime);
+    queryWrapper.select("state").eq("id", id);
     return transRuleMapper.selectOne(queryWrapper).getState();
   }
 
   @Override
-  public Boolean delete(String userName, String coinKind, LocalDateTime addTime) {
-    Integer state = transRuleState(userName, coinKind, addTime);
-    Integer id = searchUserId(userName);
+  public Boolean delete(Integer id) {
+    Integer state = transRuleState(id);
     UpdateWrapper<TransRule> queryWrapper = new UpdateWrapper<>();
-    queryWrapper.eq("id", userName).eq("coin_kind", coinKind).eq("event_add_time", addTime);
+    queryWrapper.eq("id", id);
     if (state == 0) {
       queryWrapper.set("state", 1);
     } else if (state == 1) {

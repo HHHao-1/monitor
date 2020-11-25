@@ -78,22 +78,17 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
     }
   }
 
-  public Integer addrRuleState(String userName, String eventName, LocalDateTime addTime) {
+  public Integer addrRuleState(Integer id) {
     QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper
-        .select("state")
-        .eq("id", userName)
-        .eq("event_name", eventName)
-        .eq("event_add_time", addTime);
+    queryWrapper.select("state").eq("id", id);
     return addrRuleMapper.selectOne(queryWrapper).getState();
   }
 
   @Override
-  public Boolean delete(String userName, String eventName, LocalDateTime addTime) {
-    Integer state = addrRuleState(userName, eventName, addTime);
-    Integer id = searchUserId(userName);
+  public Boolean delete(Integer id) {
+    Integer state = addrRuleState(id);
     UpdateWrapper<AddrRule> queryWrapper = new UpdateWrapper<>();
-    queryWrapper.eq("id", userName).eq("event_name", eventName).eq("event_add_time", addTime);
+    queryWrapper.eq("id", id);
     if (state == 0) {
       queryWrapper.set("state", 1);
     } else if (state == 1) {

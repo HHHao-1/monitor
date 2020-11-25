@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 public class AddrRuleVO implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  private Integer id;
+
   private String eventName;
 
   private String coinKind;

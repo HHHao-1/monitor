@@ -7,7 +7,6 @@ import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +45,9 @@ public class TransRuleController {
   }
 
   @DeleteMapping("/trans-rules")
-  public ApiResponse deleteAllRules(String userName, String coinKind, LocalDateTime AddTime) {
+  public ApiResponse deleteAllRules(Integer id) {
     try {
-      return ApiResponse.create(
-          State.SUCCESS, transRuleService.delete(userName, coinKind, AddTime));
+      return ApiResponse.create(State.SUCCESS, transRuleService.delete(id));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);

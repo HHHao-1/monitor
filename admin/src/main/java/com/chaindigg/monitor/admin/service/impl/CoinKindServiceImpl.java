@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.chaindigg.monitor.admin.dao.CoinKindMapper;
 import com.chaindigg.monitor.admin.service.ICoinKindService;
+import com.chaindigg.monitor.common.dao.CoinKindMapper;
 import com.chaindigg.monitor.common.entity.CoinKind;
 import org.springframework.stereotype.Service;
 

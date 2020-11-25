@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -101,17 +102,21 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
       List<NoticeLogVO> listquery =
           list.stream()
-              .filter(e -> e.getEventName() == eventName)
-              .filter(e -> e.getCoinKind() == coinKind)
+              .filter(e -> Objects.equals(e.getEventName(), eventName))
+              .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
               .collect(Collectors.toList());
       return listquery;
     } else if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
       List<NoticeLogVO> listquery =
-          list.stream().filter(e -> e.getEventName() == eventName).collect(Collectors.toList());
+          list.stream()
+              .filter(e -> Objects.equals(e.getEventName(), eventName))
+              .collect(Collectors.toList());
       return listquery;
     } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
       List<NoticeLogVO> listquery =
-          list.stream().filter(e -> e.getCoinKind() == coinKind).collect(Collectors.toList());
+          list.stream()
+              .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
+              .collect(Collectors.toList());
       return listquery;
     }
     return list;
