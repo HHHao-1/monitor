@@ -58,7 +58,7 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
   public List<TransRule> selectAllById(Integer id, int currentPage, int pageSize) {
     IPage<TransRule> page = new Page<TransRule>(currentPage, pageSize);
     QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("id", id);
+    queryWrapper.eq("id", id).eq("state", 1);
     return this.page(page, queryWrapper).getRecords();
   }
 

@@ -3,6 +3,8 @@ package com.chaindigg.monitor.common.utils;
 import com.chaindigg.monitor.common.enums.State;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ApiResponse {
 
@@ -31,12 +33,20 @@ public class ApiResponse {
 
   public static ApiResponse create(State s, Object... t) {
     if (t.length != 0) {
-      return success(t[0], s);
-    } else if (t[0] instanceof Boolean) {
-      if (t.equals(true)) {
-        return success(t[0], s);
+      if (t[0] instanceof Boolean) {
+        if (new Boolean(t[0].toString()) == true) {
+          return success(t[0], s);
+        } else {
+          return fail(State.FAIL);
+        }
+      } else if (t[0] instanceof List) {
+        if (((List) t[0]).size() != 0) {
+          return success(t[0], s);
+        } else {
+          return fail(State.FAIL);
+        }
       } else {
-        return fail(s);
+        return success(t[0], s);
       }
     } else {
       return fail(s);

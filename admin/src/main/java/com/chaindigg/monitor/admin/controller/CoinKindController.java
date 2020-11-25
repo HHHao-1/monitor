@@ -6,6 +6,8 @@ import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 服务控制器
  *
@@ -20,6 +22,8 @@ public class CoinKindController {
   @GetMapping("/coin-kinds")
   public ApiResponse getCoinKinds(
       String mainChain, String coinName, int currentPage, int pageSize) {
+    List list = coinKindService.selectAll(mainChain, coinName, currentPage, pageSize);
+    System.out.println(list);
     try {
       return ApiResponse.create(
           State.SUCCESS, coinKindService.selectAll(mainChain, coinName, currentPage, pageSize));

@@ -63,7 +63,7 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
   public List<AddrRule> selectAllById(Integer id, int currentPage, int pageSize) {
     IPage<AddrRule> page = new Page<AddrRule>(currentPage, pageSize);
     QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("id", id);
+    queryWrapper.eq("id", id).eq("state", 1);
     return this.page(page, queryWrapper).getRecords();
   }
 
