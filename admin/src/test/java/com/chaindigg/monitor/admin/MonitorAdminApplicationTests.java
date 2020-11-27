@@ -1,4 +1,4 @@
-package com.chaindigg.monitor;
+package com.chaindigg.monitor.admin;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,5 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class MonitorAdminApplicationTests {
 
   @Test
-  void contextLoads() {}
+  void contextLoads() {
+    System.out.println(123);
+  }
 }

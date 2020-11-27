@@ -13,12 +13,16 @@ public class UserController {
 
   @GetMapping("/users")
   public ApiResponse getUsers(String name, int currentPage, int pageSize) {
-    try {
-      return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage, pageSize));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return ApiResponse.create(State.FAIL);
+    while (true) {
+      System.out.println("test");
     }
+    //    try {
+    //      return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage,
+    // pageSize));
+    //    } catch (Exception e) {
+    //      e.printStackTrace();
+    //      return ApiResponse.create(State.FAIL);
+    //    }
   }
 
   @PostMapping("/users")
