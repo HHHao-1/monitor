@@ -7,7 +7,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 class MonitorAdminApplicationTests {
 
   @Test
-  void contextLoads() {
-    System.out.println(123);
-  }
+  void contextLoads() {}
 }

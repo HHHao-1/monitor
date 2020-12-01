@@ -1,8 +1,8 @@
 package com.chaindigg.monitor.userapi.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.chaindigg.monitor.common.dao.MonitorTransMapper;
 import com.chaindigg.monitor.common.entity.MonitorTrans;
-import com.chaindigg.monitor.userapi.dao.MonitorTransMapper;
 import com.chaindigg.monitor.userapi.service.IMonitorTransService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,7 @@
 package com.chaindigg.monitor.admin.controller;
 
 import com.chaindigg.monitor.admin.service.IUserService;
+import com.chaindigg.monitor.common.api.BlockRpcInit;
 import com.chaindigg.monitor.common.enums.State;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,19 +11,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class UserController {
   private final IUserService userService;
+  private final BlockRpcInit blockRpcInit;
 
   @GetMapping("/users")
   public ApiResponse getUsers(String name, int currentPage, int pageSize) {
-    while (true) {
-      System.out.println("test");
+    try {
+      return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage, pageSize));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
     }
-    //    try {
-    //      return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage,
-    // pageSize));
-    //    } catch (Exception e) {
-    //      e.printStackTrace();
-    //      return ApiResponse.create(State.FAIL);
-    //    }
   }
 
   @PostMapping("/users")
