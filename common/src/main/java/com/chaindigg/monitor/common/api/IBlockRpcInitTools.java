@@ -12,7 +12,7 @@ import java.util.List;
 public interface IBlockRpcInitTools {
     void monitor();
 
-    void addrmonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction);
+    void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction);
 
     void insertMonitorData(RawTransaction txElement, RawTransaction.Vout vout, List<AddrRule> addrRuleList, List<String> addrList,
                            List<String> voutAddresses, List<TransRule> transRuleList, List<String> transValueList, String vinValue,

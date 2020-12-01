@@ -13,7 +13,6 @@ import com.chaindigg.monitor.common.entity.TransRule;
 import com.sulacosoft.bitcoindconnector4j.BitcoindApi;
 import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import com.sulacosoft.bitcoindconnector4j.response.RawTransaction;
-import com.zhifantech.strategy.SeqRetryStrategy;
 import com.zhifantech.util.BitcoindPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -45,8 +45,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     @Resource
     private MonitorTransMapper monitorTransMapper;
 
-    private SeqRetryStrategy seqRetryStrategy;
-
+    
     private Class clazz = BitcoindApi.class;
 
     public void monitor() {
@@ -59,7 +58,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
             List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
             List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
             List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
-            List<String> transList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
+            List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
             //      Long maxBlockHeight;
             //      while (true) {
             //      Long maxBlockHeightOld = maxBlockHeight;
@@ -68,7 +67,8 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
             //        BlockWithTransaction blockWithTransaction =
             // BitcoindPoolUtil.getBlock(maxBlockHeight);
             BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(659314);
-            addrmonitor(addrRuleList, addrList, blockWithTransaction);
+//            addrMonitor(addrRuleList, addrList, blockWithTransaction);
+            transMonitor(transRuleList, transValueList, blockWithTransaction);
 
             //      }
             //      }
@@ -80,6 +80,41 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
         }
     }
 
+    public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, BlockWithTransaction blockWithTransaction) {
+        log.info("区块大额交易监控beginning");
+        blockWithTransaction.getTx().stream().parallel()
+                .forEach(txElement -> {
+                    txElement.getVout().stream()
+                            .forEach(voutElement -> {
+                                if (voutElement.getValue() != null) {
+                                    try {
+                                        String voutValue = voutElement.getValue().toPlainString();
+                                        insertMonitorData(txElement, voutElement, null, null, null, transRuleList,
+                                                transValueList, null, voutValue, blockWithTransaction.getTime(), true);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        log.info("区块大额交易监控vout操作异常，ending");
+                                    }
+                                }
+                            });
+                    txElement.getVin().stream()
+                            .forEach(vinElement -> {
+                                if (vinElement.getTxid() != null) {
+                                    try {
+                                        RawTransaction.Vout vout = BitcoindPoolUtil.getVout(vinElement.getTxid(), vinElement.getVout());
+                                        String vinValue = vout.getValue().toPlainString();
+                                        insertMonitorData(txElement, vout, null, null, null, transRuleList,
+                                                transValueList, vinValue, null, blockWithTransaction.getTime(), false);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        log.info("区块大额交易监控vin操作异常，ending");
+                                    }
+                                }
+                            });
+                });
+        log.info("区块大额交易监控ending");
+    }
+
     /**
      * 地址监控
      *
@@ -87,7 +122,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
      * @param addrList             监控地址集合
      * @param blockWithTransaction 区块信息实例对象
      */
-    public void addrmonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction) {
+    public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction) {
         log.info("区块地址监控beginning");
         blockWithTransaction.getTx().stream().parallel()
                 .forEach(txElement -> {
@@ -98,15 +133,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                                         List<String> addresses = voutElement.getScriptPubKey().getAddresses().stream()
                                                 .collect(Collectors.toList());
                                         insertMonitorData(txElement, voutElement, addrRuleList, addrList, addresses, null,
-                                                null, null, null, txElement.getTime(), true);
-//                                        insertMonitorData(
-//                                                addrRuleList,
-//                                                addrList,
-//                                                txElement,
-//                                                voutElement,
-//                                                addresses,
-//                                                txElement.getBlocktime(),
-//                                                true);
+                                                null, null, null, blockWithTransaction.getTime(), true);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         log.info("区块地址监控vout操作异常，ending");
@@ -121,15 +148,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                                         List<String> addresses = vout.getScriptPubKey().getAddresses().stream()
                                                 .collect(Collectors.toList());
                                         insertMonitorData(txElement, vout, addrRuleList, addrList, addresses, null,
-                                                null, null, null, txElement.getBlocktime(), false);
-//                                        insertMonitorAddr(
-//                                                addrRuleList,
-//                                                addrList,
-//                                                txElement,
-//                                                vout,
-//                                                addresses,
-//                                                txElement.getBlocktime(),
-//                                                false);
+                                                null, null, null, blockWithTransaction.getTime(), false);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         log.info("区块地址监控vin操作异常，ending");
@@ -175,13 +194,13 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
             // 扫描交易vout
             if (voutValue != null) {
                 exist = transValueList.stream()
-                        .filter(value -> Integer.parseInt(voutValue) >= Integer.parseInt(value))
+                        .filter(value -> new BigDecimal(voutValue).compareTo(new BigDecimal(value)) > 0)
                         .collect(Collectors.toList());
             }
             // 扫描交易vin
             if (vinValue != null) {
                 exist = transValueList.stream()
-                        .filter(value -> Integer.parseInt(vinValue) >= Integer.parseInt(value))
+                        .filter(value -> new BigDecimal(vinValue).compareTo(new BigDecimal(value)) > 0)
                         .collect(Collectors.toList());
             }
         }
@@ -277,6 +296,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     public void insertInspect(
             int rows, MonitorAddr monitorAddr, String transHash, MonitorTrans monitorTrans) {
         if (rows == 0) {
+            log.error("监控记录存入失败！交易哈希:" + transHash);
             // 数据库存入操作重试次数
             for (int i = 0; i < dataBaseRetryNum; i++) {
                 if (rows == 0) {
@@ -287,13 +307,13 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                         rows = monitorTransMapper.insert(monitorTrans);
                     }
                 } else {
-                    log.info("地址监控重试存入操作：第" + i + "次");
+                    log.info("重试存入操作：第" + i + "次");
                 }
             }
         }
         if (rows == 0) {
-            log.error("地址监控记录存失败！交易哈希:" + transHash);
+            log.error("监控记录重试存入失败！交易哈希:" + transHash);
         }
-        log.info("地址监控记录存入成功！");
+        log.info("监控记录存入成功！");
     }
 }
