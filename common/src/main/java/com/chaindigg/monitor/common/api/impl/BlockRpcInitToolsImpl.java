@@ -129,7 +129,9 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
   public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, BlockWithTransaction blockWithTransaction) {
     log.info("区块大额交易监控beginning");
     List<String> vinAddrList = new ArrayList<>();
+    Object[] vinAddrListS = {vinAddrList};
     List<MonitorTrans> monitorTransList = new ArrayList<>();
+    Object[] monitorTransListS = {monitorTransList};
     List<RawTransaction.Vout> existList = new ArrayList<>();
     blockWithTransaction.getTx().stream().parallel()
         .forEach(txElement -> {
@@ -169,7 +171,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                                   List<String> vinAddr = vinOut.getScriptPubKey().getAddresses();
                                   if (vinAddr.size() != 0) {
                                     String vinAddress = vinOut.getScriptPubKey().getAddresses().get(0);
-                                    vinAddrList.add(vinAddress);
+                                    ((List<String>) vinAddrListS[0]).add(vinAddress);
                                   }
                                 } catch (Exception e) {
                                   e.printStackTrace();
@@ -229,11 +231,12 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                     .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
                     .setTransRuleId(transId)
                     .setToAddress(vout.getScriptPubKey().getAddresses().get(0))
-                    .setFromAddress(StringUtils.join(vinAddrList.stream().collect(Collectors.toSet()), ","));
-                monitorTransList.add(monitorTrans);
+                    .setFromAddress(StringUtils.join(((List<String>) vinAddrListS[0]).stream().collect(Collectors.toSet()), ","));
+                ((List<MonitorTrans>) monitorTransListS[0]).add(monitorTrans);
                 
               });
             }
+            vinAddrListS[0] = null;
 //          if (monitorTransList.size() != 0) {
 //            List<MonitorTrans> result = monitorTransList.stream()
 //                .collect(Collectors.toMap(MonitorTrans::getToAddress, a -> a, (o1, o2) -> {
@@ -241,12 +244,13 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
 //                  return o1;
 //                })).values().stream().collect(Collectors.toList());
             // 插入操作
-            if (monitorTransList.size() != 0) {
-              for (MonitorTrans monitorTrans : monitorTransList) {
+            if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
+              for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
                 int rows = monitorTransMapper.insert(monitorTrans);
                 insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
               }
             }
+            monitorTransListS[0] = null;
           }
 
 //          transMonitorInsert(monitorTransList);
