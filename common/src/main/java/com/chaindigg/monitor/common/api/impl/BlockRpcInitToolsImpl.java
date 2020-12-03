@@ -136,16 +136,15 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     Object[] existListS = {existList};
     blockWithTransaction.getTx().stream().parallel()
         .forEach(txElement -> {
-          
           // 输出地址去重累加
           List<RawTransaction.Vout> txVout = txElement.getVout().stream()
               .collect(Collectors.toMap(
-                  s -> {
-                    if (s.getScriptPubKey().getAddresses() != null) {
-                      return s.getScriptPubKey().getAddresses().get(0);
+                  k -> {
+                    if (k.getScriptPubKey().getAddresses() != null) {
+                      return k.getScriptPubKey().getAddresses().get(0);
                     }
                     return null;
-                  }, a -> a, (o1, o2) -> {
+                  }, v -> v, (o1, o2) -> {
                     o1.setValue(o1.getValue().add(o2.getValue()));
                     return o1;
                   })).values().stream().collect(Collectors.toList());
@@ -173,10 +172,8 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                       }
                       if (exist != null) {
                         String unusualCount = voutElement.getValue().toPlainString();
-//                        unusualCount = voutElement.getValue().toPlainString();
                         
                         // 交易输出地址
-//                        List<String> vinAddrList = new ArrayList<>();
                         txElement.getVin().stream().parallel()
                             .forEach(vinElement -> {
                               if (vinElement.getTxid() != null) {
@@ -196,24 +193,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                         // 判断匹配地址是否是找零地址
                         if (!vinAddrList.contains(exist)) {
                           ((List<RawTransaction.Vout>) existListS[0]).add(voutElement);
-//                          List<Integer> transIdList = transRuleList.stream()
-//                              .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(new BigDecimal(voutValue)) < 0)
-//                              .map(TransRule::getId)
-//                              .collect(Collectors.toList());
-//                          String finalExist = exist;
-//                          transIdList.forEach(transId -> {
-//                            MonitorTrans monitorTrans = new MonitorTrans();
-//                            monitorTrans.setTransHash(txElement.getTxid())
-//                                .setUnusualCount(unusualCount)
-//                                .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
-//                                .setTransRuleId(transId)
-//                                .setToAddress(finalExist)
-//                                .setFromAddress(StringUtils.join(vinAddrList, ","));
-//                            monitorTransList.add(monitorTrans);
-//                          });
                         }
-
-//                        findTransMonitorAddress(transRuleList, blockWithTransaction, monitorTransList, txElement, voutValue, exist, unusualCount);
                       }
                     }
                   } catch (Exception e) {
@@ -225,19 +205,11 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
           
           // 判断、去重、插入
           if (((List<RawTransaction.Vout>) existListS[0]).size() != 0) {
-//            List<RawTransaction.Vout> result = ((List<RawTransaction.Vout>) existListS[0]).stream()
-//                .collect(Collectors.toMap(
-//                    s -> s.getScriptPubKey().getAddresses().get(0), a -> a, (o1, o2) -> {
-//                      o1.setValue(o1.getValue().add(o2.getValue()));
-//                      return o1;
-//                    })).values().stream().collect(Collectors.toList());
-//            for (RawTransaction.Vout vout : result) {
             for (RawTransaction.Vout vout : ((List<RawTransaction.Vout>) existListS[0])) {
               List<Integer> transIdList = transRuleList.stream()
                   .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(vout.getValue()) < 0)
                   .map(TransRule::getId)
                   .collect(Collectors.toList());
-//              String finalExist = exist;
               transIdList.forEach(transId -> {
                 MonitorTrans monitorTrans = new MonitorTrans();
                 try {
@@ -257,13 +229,6 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
             }
             ((List<String>) vinAddrListS[0]).clear();
             ((List<RawTransaction.Vout>) existListS[0]).clear();
-//          if (monitorTransList.size() != 0) {
-//            List<MonitorTrans> result = monitorTransList.stream()
-//                .collect(Collectors.toMap(MonitorTrans::getToAddress, a -> a, (o1, o2) -> {
-//                  o1.setUnusualCount(new BigDecimal(o1.getUnusualCount()).add(new BigDecimal(o2.getUnusualCount())).toPlainString());
-//                  return o1;
-//                })).values().stream().collect(Collectors.toList());
-            // 插入操作
             if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
               for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
                 int rows = monitorTransMapper.insert(monitorTrans);
@@ -272,8 +237,6 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
             }
             ((List<MonitorTrans>) monitorTransListS[0]).clear();
           }
-
-//          transMonitorInsert(monitorTransList);
         });
     log.info("区块大额交易监控ending");
   }
@@ -289,7 +252,20 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     log.info("区块地址监控beginning");
     blockWithTransaction.getTx().stream().parallel()
         .forEach(txElement -> {
-          txElement.getVout().stream().parallel()
+          // 输出地址去重累加
+          List<RawTransaction.Vout> txVout = txElement.getVout().stream()
+              .collect(Collectors.toMap(
+                  k -> {
+                    if (k.getScriptPubKey().getAddresses() != null) {
+                      return k.getScriptPubKey().getAddresses().get(0);
+                    }
+                    return null;
+                  }, v -> v, (o1, o2) -> {
+                    o1.setValue(o1.getValue().add(o2.getValue()));
+                    return o1;
+                  })).values().stream().collect(Collectors.toList());
+//          txElement.getVout().stream().parallel()
+          txVout.stream().parallel()
               .forEach(voutElement -> {
                 if (voutElement.getScriptPubKey().getAddresses() != null) {
                   try {
@@ -298,10 +274,8 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                       // 根据规则配配到的元素
                       String exist = null;
                       // 地址监控匹配
-                      if (addrRuleList != null) {
-                        if (addrList.contains(addresses)) {
-                          exist = addresses;
-                        }
+                      if (addrList.contains(addresses)) {
+                        exist = addresses;
                       }
                       if (exist != null) {
                         String unusualCount = "+" + voutElement.getValue().toPlainString();
@@ -315,31 +289,62 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                   }
                 }
               });
+          List<RawTransaction.Vout> txVinVout = new ArrayList<>();
           txElement.getVin().stream().parallel()
               .forEach(vinElement -> {
                 if (vinElement.getTxid() != null) {
+//                  try {
                   try {
                     RawTransaction.Vout vout = BitcoindPoolUtil.getVout(vinElement.getTxid(), vinElement.getVout());
-                    String addresses = vout.getScriptPubKey().getAddresses().get(0);
+                    txVinVout.add(vout);
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
+
+//                    String addresses = vout.getScriptPubKey().getAddresses().get(0);
+//                    if (addresses != null) {
+//                      // 根据规则配配到的元素
+//                      String exist = null;
+//
+//                      // 地址监控匹配
+//                      if (addrRuleList != null) {
+//                        if (addrList.contains(addresses)) {
+//                          exist = addresses;
+//                        }
+//                      }
+//                      if (exist != null) {
+//                        String unusualCount = "-" + vout.getValue().toPlainString();
+//                        // 插入地址监控交易
+//                        addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount);
+//                      }
+//                    }
+//                  } catch (Exception e) {
+//                    e.printStackTrace();
+//                    log.info("区块地址监控vin操作异常，ending");
+//                  }
+                }
+              });
+          txVinVout.stream().parallel()
+              .forEach(voutElement -> {
+                if (voutElement.getScriptPubKey().getAddresses() != null) {
+                  try {
+                    String addresses = voutElement.getScriptPubKey().getAddresses().get(0);
                     if (addresses != null) {
                       // 根据规则配配到的元素
                       String exist = null;
-                      
                       // 地址监控匹配
-                      if (addrRuleList != null) {
-                        if (addrList.contains(addresses)) {
-                          exist = addresses;
-                        }
+                      if (addrList.contains(addresses)) {
+                        exist = addresses;
                       }
                       if (exist != null) {
-                        String unusualCount = "-" + vout.getValue().toPlainString();
+                        String unusualCount = "-" + voutElement.getValue().toPlainString();
                         // 插入地址监控交易
                         addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount);
                       }
                     }
                   } catch (Exception e) {
                     e.printStackTrace();
-                    log.info("区块地址监控vin操作异常，ending");
+                    log.info("区块地址监控vout操作异常，ending");
                   }
                 }
               });
