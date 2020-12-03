@@ -133,9 +133,23 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     List<MonitorTrans> monitorTransList = new ArrayList<>();
     Object[] monitorTransListS = {monitorTransList};
     List<RawTransaction.Vout> existList = new ArrayList<>();
+    Object[] existListS = {existList};
     blockWithTransaction.getTx().stream().parallel()
         .forEach(txElement -> {
-          txElement.getVout().stream().parallel()
+          
+          // 输出地址去重累加
+          List<RawTransaction.Vout> txVout = txElement.getVout().stream()
+              .collect(Collectors.toMap(
+                  s -> {
+                    if (s.getScriptPubKey().getAddresses() != null) {
+                      return s.getScriptPubKey().getAddresses().get(0);
+                    }
+                    return null;
+                  }, a -> a, (o1, o2) -> {
+                    o1.setValue(o1.getValue().add(o2.getValue()));
+                    return o1;
+                  })).values().stream().collect(Collectors.toList());
+          txVout.stream().parallel()
               .forEach(voutElement -> {
                 if (voutElement.getValue() != null) {
                   try {
@@ -170,7 +184,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                                   RawTransaction.Vout vinOut = BitcoindPoolUtil.getVout(vinElement.getTxid(), vinElement.getVout());
                                   List<String> vinAddr = vinOut.getScriptPubKey().getAddresses();
                                   if (vinAddr.size() != 0) {
-                                    String vinAddress = vinOut.getScriptPubKey().getAddresses().get(0);
+                                    String vinAddress = vinAddr.get(0);
                                     ((List<String>) vinAddrListS[0]).add(vinAddress);
                                   }
                                 } catch (Exception e) {
@@ -181,7 +195,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                             });
                         // 判断匹配地址是否是找零地址
                         if (!vinAddrList.contains(exist)) {
-                          existList.add(voutElement);
+                          ((List<RawTransaction.Vout>) existListS[0]).add(voutElement);
 //                          List<Integer> transIdList = transRuleList.stream()
 //                              .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(new BigDecimal(voutValue)) < 0)
 //                              .map(TransRule::getId)
@@ -210,14 +224,15 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
               });
           
           // 判断、去重、插入
-          if (existList.size() != 0) {
-            List<RawTransaction.Vout> result = existList.stream()
-                .collect(Collectors.toMap(
-                    s -> s.getScriptPubKey().getAddresses().get(0), a -> a, (o1, o2) -> {
-                      o1.setValue(o1.getValue().add(o2.getValue()));
-                      return o1;
-                    })).values().stream().collect(Collectors.toList());
-            for (RawTransaction.Vout vout : result) {
+          if (((List<RawTransaction.Vout>) existListS[0]).size() != 0) {
+//            List<RawTransaction.Vout> result = ((List<RawTransaction.Vout>) existListS[0]).stream()
+//                .collect(Collectors.toMap(
+//                    s -> s.getScriptPubKey().getAddresses().get(0), a -> a, (o1, o2) -> {
+//                      o1.setValue(o1.getValue().add(o2.getValue()));
+//                      return o1;
+//                    })).values().stream().collect(Collectors.toList());
+//            for (RawTransaction.Vout vout : result) {
+            for (RawTransaction.Vout vout : ((List<RawTransaction.Vout>) existListS[0])) {
               List<Integer> transIdList = transRuleList.stream()
                   .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(vout.getValue()) < 0)
                   .map(TransRule::getId)
@@ -225,18 +240,23 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
 //              String finalExist = exist;
               transIdList.forEach(transId -> {
                 MonitorTrans monitorTrans = new MonitorTrans();
-                monitorTrans
-                    .setTransHash(txElement.getTxid())
-                    .setUnusualCount(vout.getValue().toPlainString())
-                    .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
-                    .setTransRuleId(transId)
-                    .setToAddress(vout.getScriptPubKey().getAddresses().get(0))
-                    .setFromAddress(StringUtils.join(((List<String>) vinAddrListS[0]).stream().collect(Collectors.toSet()), ","));
+                try {
+                  monitorTrans
+                      .setTransHash(txElement.getTxid())
+                      .setUnusualCount(vout.getValue().toPlainString())
+                      .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
+                      .setTransRuleId(transId)
+                      .setToAddress(vout.getScriptPubKey().getAddresses().get(0))
+                      .setFromAddress(StringUtils.join(((List<String>) vinAddrListS[0]).stream().collect(Collectors.toSet()), ","));
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
                 ((List<MonitorTrans>) monitorTransListS[0]).add(monitorTrans);
                 
               });
             }
-            vinAddrListS[0] = null;
+            ((List<String>) vinAddrListS[0]).clear();
+            ((List<RawTransaction.Vout>) existListS[0]).clear();
 //          if (monitorTransList.size() != 0) {
 //            List<MonitorTrans> result = monitorTransList.stream()
 //                .collect(Collectors.toMap(MonitorTrans::getToAddress, a -> a, (o1, o2) -> {
@@ -250,7 +270,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                 insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
               }
             }
-            monitorTransListS[0] = null;
+            ((List<MonitorTrans>) monitorTransListS[0]).clear();
           }
 
 //          transMonitorInsert(monitorTransList);
