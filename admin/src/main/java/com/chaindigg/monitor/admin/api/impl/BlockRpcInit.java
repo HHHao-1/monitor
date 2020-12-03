@@ -1,5 +1,6 @@
-package com.chaindigg.monitor.common.api;
+package com.chaindigg.monitor.admin.api.impl;
 
+import com.chaindigg.monitor.admin.service.IBtcRpcInitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -14,7 +15,7 @@ import javax.annotation.Resource;
 public class BlockRpcInit implements ApplicationRunner {
   
   @Resource
-  private IBlockRpcInitTools blockRpcInitTools;
+  private IBtcRpcInitService blockRpcInitTools;
   
   @Override
   public void run(ApplicationArguments args) {

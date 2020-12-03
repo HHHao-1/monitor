@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.common.api.impl;
+package com.chaindigg.monitor.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.common.api.IBlockRpcInitTools;
+import com.chaindigg.monitor.admin.service.IBtcRpcInitService;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
 import com.chaindigg.monitor.common.dao.MonitorTransMapper;
@@ -12,29 +12,25 @@ import com.chaindigg.monitor.common.entity.MonitorTrans;
 import com.chaindigg.monitor.common.entity.TransRule;
 import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import com.sulacosoft.bitcoindconnector4j.response.RawTransaction;
-import com.zhifantech.api.Rpc;
-import com.zhifantech.api.impl.BtcRpc;
-import com.zhifantech.strategy.SeqRetryStrategy;
 import com.zhifantech.util.BitcoindPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Service
 @PropertySource(value = {"classpath:rpc.properties"})
-public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
+public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
   
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
@@ -58,22 +54,8 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
   @Resource
   private MonitorTransMapper monitorTransMapper;
   
-  private SeqRetryStrategy seqRetryStrategy;
-  private Class clazz = BtcRpc.class;
-  
-  public List<Rpc> init() throws Exception {
-    ArrayList rpcList = new ArrayList();
-    Iterator var6 = urlList.iterator();
-    while (var6.hasNext()) {
-      String url = (String) var6.next();
-      Rpc rpc = new BtcRpc();
-      boolean status = rpc.init(url, username, password);
-      if (status) {
-        rpcList.add(rpc);
-      }
-    }
-    seqRetryStrategy = new SeqRetryStrategy(rpcList, rpcRetryNum, rpcRetryInterv);
-    return BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
+  public void init() {
+    BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
   }
   
   public void monitor() {
@@ -81,9 +63,9 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     try {
       // 查询规则
       QueryWrapper addrQueryWrapper = new QueryWrapper();
-      addrQueryWrapper.select("id", "address");
+      addrQueryWrapper.select("id", "address").eq("state", 1);
       QueryWrapper transQueryWrapper = new QueryWrapper();
-      transQueryWrapper.select("id", "monitor_min_val");
+      transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
       List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
       List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
       List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
@@ -127,17 +109,18 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
   public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, BlockWithTransaction blockWithTransaction) {
     log.info("区块大额交易监控beginning");
     List<String> vinAddrList = new ArrayList<>();
-    Object[] vinAddrListS = {vinAddrList};
     List<MonitorTrans> monitorTransList = new ArrayList<>();
-    Object[] monitorTransListS = {monitorTransList};
     List<RawTransaction.Vout> existList = new ArrayList<>();
+    // 解决lambda表达式中外部声明的变量必须final的问题
+    Object[] vinAddrListS = {vinAddrList};
+    Object[] monitorTransListS = {monitorTransList};
     Object[] existListS = {existList};
     blockWithTransaction.getTx().stream().parallel()
         .forEach(txElement -> {
-          // 输出地址去重累加
+          // 输出地址累加去重
           List<RawTransaction.Vout> txVout = addrAddUp(txElement);
-//          List<RawTransaction.Vout> txVout;
-          txVout.stream().parallel()
+          // 输出地址遍历匹配
+          txVout.stream()
               .forEach(voutElement -> {
                 if (voutElement.getValue() != null) {
                   try {
@@ -161,24 +144,6 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                       }
                       if (exist != null) {
                         String unusualCount = voutElement.getValue().toPlainString();
-
-//                        // 交易输出地址
-//                        txElement.getVin().stream().parallel()
-//                            .forEach(vinElement -> {
-//                              if (vinElement.getTxid() != null) {
-//                                try {
-//                                  RawTransaction.Vout vinOut = BitcoindPoolUtil.getVout(vinElement.getTxid(), vinElement.getVout());
-//                                  List<String> vinAddr = vinOut.getScriptPubKey().getAddresses();
-//                                  if (vinAddr.size() != 0) {
-//                                    String vinAddress = vinAddr.get(0);
-//                                    ((List<String>) vinAddrListS[0]).add(vinAddress);
-//                                  }
-//                                } catch (Exception e) {
-//                                  e.printStackTrace();
-//                                  log.info("获取交易输出地址异常");
-//                                }
-//                              }
-//                            });
                         // 判断匹配地址是否是找零地址
                         if (!vinAddrList.contains(exist)) {
                           ((List<RawTransaction.Vout>) existListS[0]).add(voutElement);
@@ -191,11 +156,10 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                   }
                 }
               });
-          
-          // 插入
+          // 规则匹配信息存入数据库
           if (((List<RawTransaction.Vout>) existListS[0]).size() != 0) {
             // 交易输出地址
-            txElement.getVin().stream().parallel()
+            txElement.getVin().stream()
                 .forEach(vinElement -> {
                   if (vinElement.getTxid() != null) {
                     try {
@@ -230,11 +194,11 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                   e.printStackTrace();
                 }
                 ((List<MonitorTrans>) monitorTransListS[0]).add(monitorTrans);
-                
               });
             }
             ((List<String>) vinAddrListS[0]).clear();
             ((List<RawTransaction.Vout>) existListS[0]).clear();
+            // 存入数据库
             if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
               for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
                 int rows = monitorTransMapper.insert(monitorTrans);
@@ -245,21 +209,6 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
           }
         });
     log.info("区块大额交易监控ending");
-  }
-  
-  private List<RawTransaction.Vout> addrAddUp(RawTransaction txElement) {
-    List<RawTransaction.Vout> txVout = txElement.getVout().stream()
-        .collect(Collectors.toMap(
-            k -> {
-              if (k.getScriptPubKey().getAddresses() != null) {
-                return k.getScriptPubKey().getAddresses().get(0);
-              }
-              return null;
-            }, v -> v, (o1, o2) -> {
-              o1.setValue(o1.getValue().add(o2.getValue()));
-              return o1;
-            })).values().stream().collect(Collectors.toList());
-    return txVout;
   }
   
   /**
@@ -275,7 +224,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
         .forEach(txElement -> {
           // 输出地址去重累加
           List<RawTransaction.Vout> txVout = addrAddUp(txElement);
-          txVout.stream().parallel()
+          txVout.stream()
               .forEach(voutElement -> {
                 if (voutElement.getScriptPubKey().getAddresses() != null) {
                   try {
@@ -300,7 +249,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                 }
               });
           List<RawTransaction.Vout> txVinVout = new ArrayList<>();
-          txElement.getVin().stream().parallel()
+          txElement.getVin().stream()
               .forEach(vinElement -> {
                 if (vinElement.getTxid() != null) {
                   try {
@@ -311,7 +260,7 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
                   }
                 }
               });
-          txVinVout.stream().parallel()
+          txVinVout.stream()
               .forEach(voutElement -> {
                 if (voutElement.getScriptPubKey().getAddresses() != null) {
                   try {
@@ -339,6 +288,36 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
     log.info("区块地址监控ending");
   }
   
+  /**
+   * 接收地址累加去重
+   *
+   * @param txElement 交易元素
+   * @return 返回累加去重后的交易vout
+   */
+  private List<RawTransaction.Vout> addrAddUp(RawTransaction txElement) {
+    List<RawTransaction.Vout> txVout = txElement.getVout().stream()
+        .collect(Collectors.toMap(
+            k -> {
+              if (k.getScriptPubKey().getAddresses() != null) {
+                return k.getScriptPubKey().getAddresses().get(0);
+              }
+              return null;
+            }, v -> v, (o1, o2) -> {
+              o1.setValue(o1.getValue().add(o2.getValue()));
+              return o1;
+            })).values().stream().collect(Collectors.toList());
+    return txVout;
+  }
+  
+  /**
+   * 地址监控
+   *
+   * @param addrRuleList         地址监控规则列表
+   * @param blockWithTransaction 区块信息
+   * @param txElement            交易信息
+   * @param exist                匹配到的交易
+   * @param unusualCount         异动金额
+   */
   private void addrMonitorInsert(List<AddrRule> addrRuleList, BlockWithTransaction blockWithTransaction, RawTransaction txElement, String
       exist, String unusualCount) {
     if (addrRuleList != null) {
@@ -366,27 +345,45 @@ public class BlockRpcInitToolsImpl implements IBlockRpcInitTools {
    * @param transHash    匹配地址交易的交易哈希
    * @param monitorTrans 大额交易监控数据实例对象
    */
-  public void insertInspect(
+  private void insertInspect(
       int rows, MonitorAddr monitorAddr, String transHash, MonitorTrans monitorTrans) {
     if (rows == 0) {
-      log.error("监控记录存入失败！交易哈希:" + transHash);
-      // 数据库存入操作重试次数
-      for (int i = 0; i < dataBaseRetryNum; i++) {
-        if (rows == 0) {
-          if (monitorAddr != null) {
+      if (monitorAddr != null) {
+        log.error("地址监控记录存入失败！交易哈希:" + transHash);
+        // 数据库存入操作重试
+        for (int i = 0; i < dataBaseRetryNum; i++) {
+          if (rows == 0) {
             rows = monitorAddrMapper.insert(monitorAddr);
+          } else {
+            log.info("地址监控记录重试存入操作：第" + i + "次");
           }
-          if (monitorTrans != null) {
+        }
+      }
+      if (monitorTrans != null) {
+        log.error("大额交易监控记录存入失败！交易哈希:" + transHash);
+        // 数据库存入操作重试
+        for (int i = 0; i < dataBaseRetryNum; i++) {
+          if (rows == 0) {
             rows = monitorTransMapper.insert(monitorTrans);
+          } else {
+            log.info("大额交易监控记录重试存入操作：第" + i + "次");
           }
-        } else {
-          log.info("重试存入操作：第" + i + "次");
         }
       }
     }
     if (rows == 0) {
-      log.error("监控记录重试存入失败！交易哈希:" + transHash);
+      if (monitorAddr != null) {
+        log.error("地址监控记录重试存入失败！交易哈希:" + transHash);
+      }
+      if (monitorTrans != null) {
+        log.error("大额交易监控记录重试存入失败！交易哈希:" + transHash);
+      }
     }
-    log.info("监控记录存入成功！");
+    if (monitorAddr != null) {
+      log.info("地址监控记录存入成功！");
+    }
+    if (monitorTrans != null) {
+      log.info("大额交易监控记录存入成功！");
+    }
   }
 }

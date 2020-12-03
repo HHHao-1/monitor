@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin.controller;
 
+import com.chaindigg.monitor.admin.api.impl.BlockRpcInit;
 import com.chaindigg.monitor.admin.service.IUserService;
-import com.chaindigg.monitor.common.api.BlockRpcInit;
 import com.chaindigg.monitor.common.enums.State;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
   private final IUserService userService;
   private final BlockRpcInit blockRpcInit;
-
+  
   @GetMapping("/users")
   public ApiResponse getUsers(String name, int currentPage, int pageSize) {
     try {
@@ -22,10 +22,10 @@ public class UserController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/users")
   public ApiResponse addUsers(String name, String phone, String email, String remark) {
-
+    
     try {
       return ApiResponse.create(State.SUCCESS, userService.add(name, phone, email, remark));
     } catch (Exception e) {
@@ -33,7 +33,7 @@ public class UserController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/users")
   public ApiResponse deleteUser(Integer id) {
     try {
@@ -43,7 +43,7 @@ public class UserController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/users")
   public ApiResponse updateUser(
       Integer id, String name, String phone, String email, String remark) {
