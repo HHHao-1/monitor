@@ -95,7 +95,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.2.3</version>
+            <version>1.1.22</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>io.springfox</groupId>-->
@@ -112,10 +112,6 @@
             <artifactId>btc-block-monitor</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
-                <!--                <exclusion>-->
-                <!--                    <artifactId>commons-io</artifactId>-->
-                <!--                    <groupId>commons-io</groupId>-->
-                <!--                </exclusion>-->
                 <exclusion>
                     <artifactId>commons-lang</artifactId>
                     <groupId>commons-lang</groupId>
@@ -127,6 +123,27 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.qcloudsms</groupId>
+            <artifactId>qcloudsms</artifactId>
+            <version>1.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
             </exclusions>
         </dependency>

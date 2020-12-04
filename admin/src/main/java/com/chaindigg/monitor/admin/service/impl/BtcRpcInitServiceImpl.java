@@ -12,6 +12,7 @@ import com.chaindigg.monitor.common.entity.MonitorTrans;
 import com.chaindigg.monitor.common.entity.TransRule;
 import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import com.sulacosoft.bitcoindconnector4j.response.RawTransaction;
+import com.zhifantech.api.Rpc;
 import com.zhifantech.util.BitcoindPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,44 +56,78 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
   private MonitorTransMapper monitorTransMapper;
   
   public void init() {
-    BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
+    try {
+      List<Rpc> test = BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   
   public void monitor() {
     log.info("区块监控beginning");
     try {
-      // 查询规则
+      // region 查询规则
       QueryWrapper addrQueryWrapper = new QueryWrapper();
       addrQueryWrapper.select("id", "address").eq("state", 1);
+      addrQueryWrapper.in("coin_kind", "BTC", "BCH", "LTC");
       QueryWrapper transQueryWrapper = new QueryWrapper();
       transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
+      transQueryWrapper.in("coin_kind", "BTC", "BCH", "LTC");
       List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
       List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
       List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
       List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
-      //      Long maxBlockHeight;
+      // endregion
+      
+      Long maxBlockHeight = null;
       //      while (true) {
       //      Long maxBlockHeightOld = maxBlockHeight;
-      //      maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
+      maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
       //      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
       //        BlockWithTransaction blockWithTransaction =
-      // BitcoindPoolUtil.getBlock(maxBlockHeight);
+//      BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(664381);
       BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(659314);
       List<String> runList = new ArrayList();
       runList.add("addr");
       runList.add("trans");
       runList.stream().parallel().forEach(s -> {
-        if (s.equals("addr")) {
-          addrMonitor(addrRuleList, addrList, blockWithTransaction);
-        }
-        if (s.equals("trans")) {
-          transMonitor(transRuleList, transValueList, blockWithTransaction);
+        switch (s) {
+          case "addr":
+            log.info("线程：" + Thread.currentThread().getName());
+            addrMonitor(addrRuleList, addrList, blockWithTransaction);
+            break;
+          case "trans":
+            log.info("线程：" + Thread.currentThread().getName());
+            transMonitor(transRuleList, transValueList, blockWithTransaction);
+            break;
         }
       });
+//        if (s.equals("addr")) {
+//          addrMonitor(addrRuleList, addrList, blockWithTransaction);
+//        }
+//        if (s.equals("trans")) {
+//          transMonitor(transRuleList, transValueList, blockWithTransaction);
+//        }
+//      });
       //      }
       //      }
       //      Thread.sleep(3000);
       //      }
+//      MailService mailService = new MailServiceImpl();
+//      mailService.init(null);
+//      mailService.sendHtmlMail("454947233@qq.com", "test", "test");
+
+//      SmsService smsService = new SmsServiceImpl();
+//      smsService.init(null);
+//      Integer templateCode = TencentSmsTemplateEnum.SMS_MONITORING.getCode();
+//      ArrayList<String> objects = new ArrayList<>();
+//      objects.add("1234");
+//      objects.add("3");
+//      objects.add("3");
+//      objects.add("3");
+//      objects.add("3");
+//      objects.add("3");
+//      smsService.sendSms(null, "13279202134", templateCode, objects);
     } catch (Exception e) {
       e.printStackTrace();
       log.info("区块监控异常，ending");
@@ -310,12 +345,12 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
   }
   
   /**
-   * 地址监控
+   * 地址监控存入操作
    *
-   * @param addrRuleList         地址监控规则列表
+   * @param addrRuleList         地址规则列表
    * @param blockWithTransaction 区块信息
    * @param txElement            交易信息
-   * @param exist                匹配到的交易
+   * @param exist                匹配到的地址
    * @param unusualCount         异动金额
    */
   private void addrMonitorInsert(List<AddrRule> addrRuleList, BlockWithTransaction blockWithTransaction, RawTransaction txElement, String
@@ -374,13 +409,45 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
     if (rows == 0) {
       if (monitorAddr != null) {
         log.error("地址监控记录重试存入失败！交易哈希:" + transHash);
+        return;
       }
       if (monitorTrans != null) {
         log.error("大额交易监控记录重试存入失败！交易哈希:" + transHash);
+        return;
       }
     }
     if (monitorAddr != null) {
       log.info("地址监控记录存入成功！");
+//      MailService mailService = new MailServiceImpl();
+//      mailService.init(null);
+//      mailService.sendHtmlMail("454947233@qq.com", "test", "test");
+//      ThreadPoolExecutor executor = ThreadPoolHelper.getTheadPoolExecutor();
+//      TxDetail txDetail = new TxDetail("0xETH", TxTypeEnum.TRANSFER, "3N4jAvWst3bn7zwFc4ZvYYxsTqTXUp4qiB", true, new BigDecimal(100.007),
+//          "dff658277ce2efc416eb0aa6fd6d5b461f7da886a6af1081953294c99b8caee7", 1606983247L, 100L, "111");
+//      List<TxDetail> list = new ArrayList<>();
+//      list.add(txDetail);
+//      UserTxRuleVo vo = new UserTxRuleVo();
+//      vo.setEmail("454947233@qq.com");
+//      vo.setMobile("13279202134");
+//      vo.setNotify_type(2);
+//      vo.setId(1L);
+//      vo.setCreate_time(new Date());
+//      vo.setRule_name("地址监控");
+//      vo.setUser_id(1L);
+//      vo.setCoin_hash("0xETH");
+//      vo.setOperation_type(1);
+//      vo.setOperation_address("ddddd");
+//      vo.setAddress_tag("tag");
+//      vo.setThreshold_value(new BigDecimal(1.0009));
+//      vo.setThreshold_unit("1");
+//
+//      Map<UserTxRuleVo, List<TxDetail>> userDetailMap = new HashMap<>();
+//      userDetailMap.put(vo, list);
+////      IProcessService processService = new ProcessServiceImpl();
+////      processService.process(userDetailMap);
+//      executor.execute(new SmsSendStrategy(vo, list));
+//      AlertEmail.sendEmail2Monitor();
+      
     }
     if (monitorTrans != null) {
       log.info("大额交易监控记录存入成功！");
