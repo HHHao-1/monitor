@@ -22,7 +22,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,13 +102,11 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    */
   public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction) {
     log.info("区块大额交易监控beginning");
-    List<MonitorTrans> monitorTransList = new ArrayList<>();
-    // 解决lambda表达式中外部声明的变量必须final的问题
-    Object[] monitorTransListS = {monitorTransList};
-    blockWithTransaction.getTransactions().stream().parallel().filter(s -> transValueList.contains(s))
+    blockWithTransaction.getTransactions().stream().parallel()
+        .filter(s -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(new BigDecimal(s.getValueRaw())) < 0).count() > 0)
         .forEach(txElement -> {
           List<Integer> transIdList = transRuleList.stream()
-              .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
+              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
               .map(TransRule::getId)
               .collect(Collectors.toList());
           transIdList.forEach(transId -> {
@@ -122,18 +119,12 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
                   .setTransRuleId(transId)
                   .setToAddress(txElement.getTo())
                   .setFromAddress(txElement.getFrom());
+              int rows = monitorTransMapper.insert(monitorTrans);
+              DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
             } catch (Exception e) {
               e.printStackTrace();
             }
-            ((List<MonitorTrans>) monitorTransListS[0]).add(monitorTrans);
           });
-          if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
-            for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
-              int rows = monitorTransMapper.insert(monitorTrans);
-              DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
-            }
-          }
-          ((List<MonitorTrans>) monitorTransListS[0]).clear();
         });
     log.info("区块大额交易监控ending");
   }
@@ -147,16 +138,32 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    */
   public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction) {
     log.info("区块地址监控beginning");
-    blockWithTransaction.getTransactions().stream().parallel().filter(s -> addrList.contains(s))
+    blockWithTransaction.getTransactions().stream().parallel().filter(s -> addrList.contains(s.getFrom()))
         .forEach(txElement -> {
           List<Integer> addrIdList = addrRuleList.stream()
-              .filter(s -> s.getAddress().equals(txElement.getFrom()) || s.getAddress().equals(txElement.getTo()))
+              .filter(s -> s.getAddress().equals(txElement.getFrom()))
               .map(AddrRule::getId)
               .collect(Collectors.toList());
           addrIdList.forEach(addrId -> {
             final MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
-                .setUnusualCount(txElement.getValueRaw())
+                .setUnusualCount("-" + txElement.getValueRaw())
+                .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
+                .setAddrRuleId(addrId);
+            int rows = monitorAddrMapper.insert(monitorAddr);
+            DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null);
+          });
+        });
+    blockWithTransaction.getTransactions().stream().parallel().filter(s -> addrList.contains(s.getTo()))
+        .forEach(txElement -> {
+          List<Integer> addrIdList = addrRuleList.stream()
+              .filter(s -> s.getAddress().equals(txElement.getTo()))
+              .map(AddrRule::getId)
+              .collect(Collectors.toList());
+          addrIdList.forEach(addrId -> {
+            final MonitorAddr monitorAddr = new MonitorAddr();
+            monitorAddr.setTransHash(txElement.getHash())
+                .setUnusualCount("+" + txElement.getValueRaw())
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);

@@ -2,6 +2,7 @@ package com.chaindigg.monitor.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chaindigg.monitor.admin.service.IBtcRpcInitService;
+import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
 import com.chaindigg.monitor.common.dao.MonitorTransMapper;
@@ -237,7 +238,7 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
             if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
               for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
                 int rows = monitorTransMapper.insert(monitorTrans);
-                insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
+                DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
               }
             }
             ((List<MonitorTrans>) monitorTransListS[0]).clear();
@@ -367,7 +368,7 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
             .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
             .setAddrRuleId(addrId);
         int rows = monitorAddrMapper.insert(monitorAddr);
-        insertInspect(rows, monitorAddr, txElement.getTxid(), null);
+        DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getTxid(), null);
       });
     }
   }
