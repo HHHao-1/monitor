@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin.rpcservice.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.rpcservice.ILtcRpcInitService;
+import com.chaindigg.monitor.admin.rpcservice.IBitCommonService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
@@ -25,27 +25,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@PropertySource(value = {"classpath:rpc.properties"})
-public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
+@PropertySource(value = {"classpath:config.properties"})
+public class BitCommonServiceImpl implements IBitCommonService {
   
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
-  @Value("#{'${ltc-rpc-urls}'.split(',')}")
-  private List<String> urlList; // 节点url
-  @Value("${ltc-retry-num}")
-  private int rpcRetryNum; // 链接失败重试次数
-  @Value("${ltc-retry-interv}")
-  private int rpcRetryInterv; // 重新链接间隔时间
-  @Value("${ltc-user-name}")
-  private String username; // 用户名
-  @Value("${ltc-password}")
-  private String password; // 密码
   
   @Resource
   private AddrRuleMapper addrRuleMapper;
@@ -56,66 +47,42 @@ public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
   @Resource
   private MonitorTransMapper monitorTransMapper;
   
-  public void init() {
-    try {
-      BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
-    } catch (Exception e) {
-      e.printStackTrace();
+  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper) throws Exception {
+    // region 查询规则
+    List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
+    List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
+    List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
+    List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
+    // endregion
+    Long maxBlockHeight = null;
+    Long maxBlockHeightOld = null;
+    while (true) {
+      maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
+      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+        maxBlockHeightOld = maxBlockHeight;
+        BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(maxBlockHeight);
+        //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
+        //      log.info(rawEthBlock.toString());
+        List<String> runList = Arrays.asList("addr", "trans");
+        runList.stream().parallel().forEach(s -> {
+          switch (s) {
+            case "addr":
+              addrMonitor(addrRuleList, addrList, blockWithTransaction);
+              break;
+            case "trans":
+              transMonitor(transRuleList, transValueList, blockWithTransaction);
+              break;
+          }
+        });
+      }
     }
   }
-  
-  public void monitor() {
-    log.info("区块监控beginning");
-    try {
-      // region 查询规则
-      QueryWrapper addrQueryWrapper = new QueryWrapper();
-      addrQueryWrapper.select("id", "address").eq("state", 1);
-      addrQueryWrapper.eq("coin_kind", "LTC");
-      QueryWrapper transQueryWrapper = new QueryWrapper();
-      transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
-      transQueryWrapper.eq("coin_kind", "LTC");
-      List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
-      List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
-      List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
-      List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
-      // endregion
-      
-      Long maxBlockHeight = null;
-      while (true) {
-        Long maxBlockHeightOld = maxBlockHeight;
-        maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
-        if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
-          BlockWithTransaction blockWithTransaction = null;
-          try {
-            blockWithTransaction = BitcoindPoolUtil.getBlock(maxBlockHeight);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-//        BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(659314);
-          List<String> runList = new ArrayList();
-          runList.add("addr");
-          runList.add("trans");
-          BlockWithTransaction finalBlockWithTransaction = blockWithTransaction;
-          runList.stream().parallel().forEach(s -> {
-            switch (s) {
-              case "addr":
-                log.info("线程：" + Thread.currentThread().getName());
-                addrMonitor(addrRuleList, addrList, finalBlockWithTransaction);
-                break;
-              case "trans":
-                log.info("线程：" + Thread.currentThread().getName());
-                transMonitor(transRuleList, transValueList, finalBlockWithTransaction);
-                break;
-            }
-          });
-        }
-      }
 //      MailService mailService = new MailServiceImpl();
-//      mailService.init(null);
+//      mailService.bitInit(null);
 //      mailService.sendHtmlMail("454947233@qq.com", "test", "test");
 //
 //      SmsService smsService = new SmsServiceImpl();
-//      smsService.init(null);
+//      smsService.bitInit(null);
 //      Integer templateCode = TencentSmsTemplateEnum.SMS_MONITORING.getCode();
 //      ArrayList<String> objects = new ArrayList<>();
 //      objects.add("1234");
@@ -125,11 +92,11 @@ public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
 //      objects.add("3");
 //      objects.add("3");
 //      smsService.sendSms(null, "13279202134", templateCode, objects);
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.info("区块监控异常，ending");
-    }
-  }
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      log.info("区块监控异常，ending");
+//    }
+//  }
   
   /**
    * 大额交易监控
@@ -147,7 +114,7 @@ public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
     Object[] vinAddrListS = {vinAddrList};
     Object[] monitorTransListS = {monitorTransList};
     Object[] existListS = {existList};
-    blockWithTransaction.getTx().stream().parallel()
+    blockWithTransaction.getTx().stream()
         .forEach(txElement -> {
           // 输出地址累加去重
           List<RawTransaction.Vout> txVout = addrAddUp(txElement);
@@ -252,7 +219,7 @@ public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
    */
   public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction) {
     log.info("区块地址监控beginning");
-    blockWithTransaction.getTx().stream().parallel()
+    blockWithTransaction.getTx().stream()
         .forEach(txElement -> {
           // 输出地址去重累加
           List<RawTransaction.Vout> txVout = addrAddUp(txElement);

@@ -3,6 +3,7 @@ package com.chaindigg.monitor.admin.rpcservice.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chaindigg.monitor.admin.rpcservice.IEthRpcInitService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
+import com.chaindigg.monitor.admin.utils.RpcUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
 import com.chaindigg.monitor.common.dao.MonitorTransMapper;
@@ -22,21 +23,17 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@PropertySource(value = {"classpath:rpc.properties"})
+@PropertySource(value = {"classpath:config.properties"})
 public class EthRpcInitServiceImpl implements IEthRpcInitService {
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
-  @Value("#{'${eth-rpc-urls}'.split(',')}")
-  private List<String> urlList; // 节点url
-  @Value("${eth-retry-num}")
-  private int rpcRetryNum; // 链接失败重试次数
-  @Value("${eth-retry-interv}")
-  private int rpcRetryInterv; // 重新链接间隔时间
   
   @Resource
   private AddrRuleMapper addrRuleMapper;
@@ -46,51 +43,47 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
   private MonitorAddrMapper monitorAddrMapper;
   @Resource
   private MonitorTransMapper monitorTransMapper;
+  @Resource
+  private RpcUtils rpcUtils;
   
-  public void init() {
-    try {
-      ParityPoolUtil.init(urlList, rpcRetryNum, rpcRetryInterv);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  public void ethMonitor() {
+    log.info("ETH区块监控beginning");
+    monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1]);
   }
   
-  public void monitor() {
-    log.info("区块监控beginning");
-    try {
-      // region 查询规则
-      QueryWrapper addrQueryWrapper = new QueryWrapper();
-      addrQueryWrapper.select("id", "address").eq("state", 1);
-      addrQueryWrapper.eq("coin_kind", "ETH");
-      QueryWrapper transQueryWrapper = new QueryWrapper();
-      transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
-      transQueryWrapper.in("coin_kind", "ETH");
-      List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
-      List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
-      List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
-      List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
-      // endregion
-      
-      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
-      log.info(rawEthBlock.toString());
-//      List<String> runList = new ArrayList();
-//      runList.add("addr");
-//      runList.add("trans");
-//      runList.stream().parallel().forEach(s -> {
-//        switch (s) {
-//          case "addr":
-//            log.info("线程：" + Thread.currentThread().getName());
-//            addrMonitor(addrRuleList, addrList, rawEthBlock);
-//            break;
-//          case "trans":
-//            log.info("线程：" + Thread.currentThread().getName());
-//            transMonitor(transRuleList, transValueList, rawEthBlock);
-//            break;
-//        }
-//      });
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.info("区块监控异常，ending");
+  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper) {
+    // region 查询规则
+    List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
+    List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
+    List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
+    List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
+    // endregion
+    Long maxBlockHeight = null;
+    Long maxBlockHeightOld = null;
+    while (true) {
+      try {
+        maxBlockHeight = ParityPoolUtil.getMaxBlockHeight();
+        if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+          maxBlockHeightOld = maxBlockHeight;
+          RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
+          //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
+          //      log.info(rawEthBlock.toString());
+          List<String> runList = Arrays.asList("addr", "trans");
+          runList.stream().parallel().forEach(s -> {
+            switch (s) {
+              case "addr":
+                addrMonitor(addrRuleList, addrList, rawEthBlock);
+                break;
+              case "trans":
+                transMonitor(transRuleList, transValueList, rawEthBlock);
+                break;
+            }
+          });
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.info("ETH区块监控异常，ending");
+      }
     }
   }
   
@@ -103,7 +96,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    */
   public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction) {
     log.info("区块大额交易监控beginning");
-    blockWithTransaction.getTransactions().stream().parallel()
+    blockWithTransaction.getTransactions().stream()
         .filter(s -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(new BigDecimal(s.getValueRaw())) < 0).count() > 0)
         .forEach(txElement -> {
           List<Integer> transIdList = transRuleList.stream()
@@ -139,7 +132,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    */
   public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction) {
     log.info("区块地址监控beginning");
-    blockWithTransaction.getTransactions().stream().parallel().filter(s -> addrList.contains(s.getFrom()))
+    blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getFrom()))
         .forEach(txElement -> {
           List<Integer> addrIdList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getFrom()))
@@ -155,7 +148,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
             DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null);
           });
         });
-    blockWithTransaction.getTransactions().stream().parallel().filter(s -> addrList.contains(s.getTo()))
+    blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getTo()))
         .forEach(txElement -> {
           List<Integer> addrIdList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getTo()))
