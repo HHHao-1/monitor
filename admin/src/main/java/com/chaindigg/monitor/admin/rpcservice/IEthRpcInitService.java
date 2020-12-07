@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.service;
+package com.chaindigg.monitor.admin.rpcservice;
 
 public interface IEthRpcInitService {
   void init();

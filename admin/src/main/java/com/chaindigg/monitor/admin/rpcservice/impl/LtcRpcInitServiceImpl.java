@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.admin.service.impl;
+package com.chaindigg.monitor.admin.rpcservice.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.service.IBtcRpcInitService;
+import com.chaindigg.monitor.admin.rpcservice.ILtcRpcInitService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
@@ -13,7 +13,6 @@ import com.chaindigg.monitor.common.entity.MonitorTrans;
 import com.chaindigg.monitor.common.entity.TransRule;
 import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import com.sulacosoft.bitcoindconnector4j.response.RawTransaction;
-import com.zhifantech.api.Rpc;
 import com.zhifantech.util.BitcoindPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,24 +26,25 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @PropertySource(value = {"classpath:rpc.properties"})
-public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
+public class LtcRpcInitServiceImpl implements ILtcRpcInitService {
   
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
-  @Value("#{'${rpc-urls}'.split(',')}")
+  @Value("#{'${ltc-rpc-urls}'.split(',')}")
   private List<String> urlList; // 节点url
-  @Value("${rpc-retry-num}")
+  @Value("${ltc-retry-num}")
   private int rpcRetryNum; // 链接失败重试次数
-  @Value("${rpc-retry-interv}")
+  @Value("${ltc-retry-interv}")
   private int rpcRetryInterv; // 重新链接间隔时间
-  @Value("${rpc-user-name}")
+  @Value("${ltc-user-name}")
   private String username; // 用户名
-  @Value("${rpc-password}")
+  @Value("${ltc-password}")
   private String password; // 密码
   
   @Resource
@@ -58,7 +58,7 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
   
   public void init() {
     try {
-      List<Rpc> test = BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
+      BitcoindPoolUtil.init(urlList, username, password, rpcRetryNum, rpcRetryInterv);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -70,10 +70,10 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
       // region 查询规则
       QueryWrapper addrQueryWrapper = new QueryWrapper();
       addrQueryWrapper.select("id", "address").eq("state", 1);
-      addrQueryWrapper.in("coin_kind", "BTC", "BCH", "LTC");
+      addrQueryWrapper.eq("coin_kind", "LTC");
       QueryWrapper transQueryWrapper = new QueryWrapper();
       transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
-      transQueryWrapper.in("coin_kind", "BTC", "BCH", "LTC");
+      transQueryWrapper.eq("coin_kind", "LTC");
       List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
       List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
       List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
@@ -81,43 +81,39 @@ public class BtcRpcInitServiceImpl implements IBtcRpcInitService {
       // endregion
       
       Long maxBlockHeight = null;
-      //      while (true) {
-      //      Long maxBlockHeightOld = maxBlockHeight;
-      maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
-      //      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
-      //        BlockWithTransaction blockWithTransaction =
-//      BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(664381);
-      BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(659314);
-      List<String> runList = new ArrayList();
-      runList.add("addr");
-      runList.add("trans");
-      runList.stream().parallel().forEach(s -> {
-        switch (s) {
-          case "addr":
-            log.info("线程：" + Thread.currentThread().getName());
-            addrMonitor(addrRuleList, addrList, blockWithTransaction);
-            break;
-          case "trans":
-            log.info("线程：" + Thread.currentThread().getName());
-            transMonitor(transRuleList, transValueList, blockWithTransaction);
-            break;
+      while (true) {
+        Long maxBlockHeightOld = maxBlockHeight;
+        maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
+        if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+          BlockWithTransaction blockWithTransaction = null;
+          try {
+            blockWithTransaction = BitcoindPoolUtil.getBlock(maxBlockHeight);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+//        BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(659314);
+          List<String> runList = new ArrayList();
+          runList.add("addr");
+          runList.add("trans");
+          BlockWithTransaction finalBlockWithTransaction = blockWithTransaction;
+          runList.stream().parallel().forEach(s -> {
+            switch (s) {
+              case "addr":
+                log.info("线程：" + Thread.currentThread().getName());
+                addrMonitor(addrRuleList, addrList, finalBlockWithTransaction);
+                break;
+              case "trans":
+                log.info("线程：" + Thread.currentThread().getName());
+                transMonitor(transRuleList, transValueList, finalBlockWithTransaction);
+                break;
+            }
+          });
         }
-      });
-//        if (s.equals("addr")) {
-//          addrMonitor(addrRuleList, addrList, blockWithTransaction);
-//        }
-//        if (s.equals("trans")) {
-//          transMonitor(transRuleList, transValueList, blockWithTransaction);
-//        }
-//      });
-      //      }
-      //      }
-      //      Thread.sleep(3000);
-      //      }
+      }
 //      MailService mailService = new MailServiceImpl();
 //      mailService.init(null);
 //      mailService.sendHtmlMail("454947233@qq.com", "test", "test");
-
+//
 //      SmsService smsService = new SmsServiceImpl();
 //      smsService.init(null);
 //      Integer templateCode = TencentSmsTemplateEnum.SMS_MONITORING.getCode();

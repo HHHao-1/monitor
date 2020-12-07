@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.admin.service.impl;
+package com.chaindigg.monitor.admin.rpcservice.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.service.IEthRpcInitService;
+import com.chaindigg.monitor.admin.rpcservice.IEthRpcInitService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class EthRpcInitServiceImpl implements IEthRpcInitService {
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
-  @Value("#{'${eth-urls}'.split(',')}")
+  @Value("#{'${eth-rpc-urls}'.split(',')}")
   private List<String> urlList; // 节点url
   @Value("${eth-retry-num}")
   private int rpcRetryNum; // 链接失败重试次数
@@ -72,6 +72,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
       // endregion
       
       RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
+      log.info(rawEthBlock.toString());
 //      List<String> runList = new ArrayList();
 //      runList.add("addr");
 //      runList.add("trans");

@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.service;
+package com.chaindigg.monitor.admin.rpcservice;
 
 
 import com.chaindigg.monitor.common.entity.AddrRule;
@@ -7,7 +7,7 @@ import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 
 import java.util.List;
 
-public interface IBtcRpcInitService {
+public interface ILtcRpcInitService {
   void init();
   
   void monitor();

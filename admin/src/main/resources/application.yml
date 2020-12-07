@@ -3,7 +3,18 @@ server:
   servlet:
     context-path: /monitor/admin
 
+#eureka:
+#  instance:
+#    hostname: localhost
+#  client:
+#    register-with-eureka: false
+#    fetch-registry: false
+#    service-url:
+#      defaultZone: http://localhost:8080/eureka/
+
 spring:
+  #  application:
+  #    name: monitor-admin
   datasource:
     url: jdbc:mysql://localhost:3306/monitor?characterEncoding=utf-8&useSSL=true&serverTimezone=Hongkong
     username: root
