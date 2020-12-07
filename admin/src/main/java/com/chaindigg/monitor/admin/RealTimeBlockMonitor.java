@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.admin.api.impl;
+package com.chaindigg.monitor.admin;
 
-import com.chaindigg.monitor.admin.rpcservice.IBitRpcInitService;
-import com.chaindigg.monitor.admin.rpcservice.IEthRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IBitRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IEthRpcInitService;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Component
 @PropertySource(value = {"classpath:rpc.properties"})
-public class BlockRpcInit implements ApplicationRunner {
+public class RealTimeBlockMonitor implements ApplicationRunner {
   // 节点url
   @Value("#{'${btc-rpc-urls}'.split(',')}")
   private List<String> btcUrlList;
@@ -49,6 +49,7 @@ public class BlockRpcInit implements ApplicationRunner {
     rpcUtils.bitInit(bsvUrlList);
     rpcUtils.ethInit(ethUrlList);
     
+    // 多币种监控并行运行
     List<String> runList = Arrays.asList("btc", "bch", "ltc", "bsv", "eth");
     runList.parallelStream().forEach(element -> {
       switch (element) {

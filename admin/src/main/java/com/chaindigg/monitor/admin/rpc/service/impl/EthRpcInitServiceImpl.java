@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.admin.rpcservice.impl;
+package com.chaindigg.monitor.admin.rpc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.rpcservice.IEthRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IEthRpcInitService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;

@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.rpcservice;
+package com.chaindigg.monitor.admin.rpc.service;
 
 
 public interface IBitRpcInitService {

@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.rpcservice;
+package com.chaindigg.monitor.admin.rpc.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chaindigg.monitor.common.entity.AddrRule;

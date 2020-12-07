@@ -1,7 +1,7 @@
-package com.chaindigg.monitor.admin.rpcservice.impl;
+package com.chaindigg.monitor.admin.rpc.service.impl;
 
-import com.chaindigg.monitor.admin.rpcservice.IBitCommonService;
-import com.chaindigg.monitor.admin.rpcservice.IBitRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IBitCommonService;
+import com.chaindigg.monitor.admin.rpc.service.IBitRpcInitService;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
