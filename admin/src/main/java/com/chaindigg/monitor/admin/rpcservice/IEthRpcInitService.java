@@ -11,9 +11,9 @@ public interface IEthRpcInitService {
   
   void ethMonitor();
   
-  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper);
+  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind);
   
-  void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction);
+  void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction, String coinKind);
   
-  void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction);
+  void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction, String coinKind);
 }

@@ -47,7 +47,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
   @Resource
   private MonitorTransMapper monitorTransMapper;
   
-  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper) throws Exception {
+  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) throws Exception {
     // region 查询规则
     List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
     List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
@@ -59,6 +59,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
     while (true) {
       maxBlockHeight = BitcoindPoolUtil.getMaxBlockHeight();
       if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+        log.info(coinKind + "区块监控beginning");
         maxBlockHeightOld = maxBlockHeight;
         BlockWithTransaction blockWithTransaction = BitcoindPoolUtil.getBlock(maxBlockHeight);
         //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
@@ -67,10 +68,10 @@ public class BitCommonServiceImpl implements IBitCommonService {
         runList.stream().parallel().forEach(s -> {
           switch (s) {
             case "addr":
-              addrMonitor(addrRuleList, addrList, blockWithTransaction);
+              addrMonitor(addrRuleList, addrList, blockWithTransaction, coinKind);
               break;
             case "trans":
-              transMonitor(transRuleList, transValueList, blockWithTransaction);
+              transMonitor(transRuleList, transValueList, blockWithTransaction, coinKind);
               break;
           }
         });
@@ -105,8 +106,9 @@ public class BitCommonServiceImpl implements IBitCommonService {
    * @param transValueList       监控额度集合
    * @param blockWithTransaction 区块信息实例对象
    */
-  public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, BlockWithTransaction blockWithTransaction) {
-    log.info("区块大额交易监控beginning");
+  public void transMonitor(List<TransRule> transRuleList, List<String> transValueList,
+                           BlockWithTransaction blockWithTransaction, String coinKind) {
+    log.info(coinKind + "区块大额交易监控beginning");
     List<String> vinAddrList = new ArrayList<>();
     List<MonitorTrans> monitorTransList = new ArrayList<>();
     List<RawTransaction.Vout> existList = new ArrayList<>();
@@ -151,7 +153,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                     }
                   } catch (Exception e) {
                     e.printStackTrace();
-                    log.info("区块大额交易监控vout操作异常，ending");
+                    log.info(coinKind + "区块大额交易监控vout操作异常，ending");
                   }
                 }
               });
@@ -170,7 +172,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                       }
                     } catch (Exception e) {
                       e.printStackTrace();
-                      log.info("获取交易输出地址异常");
+                      log.info(coinKind + "获取交易输出地址异常");
                     }
                   }
                 });
@@ -201,13 +203,13 @@ public class BitCommonServiceImpl implements IBitCommonService {
             if (((List<MonitorTrans>) monitorTransListS[0]).size() != 0) {
               for (MonitorTrans monitorTrans : ((List<MonitorTrans>) monitorTransListS[0])) {
                 int rows = monitorTransMapper.insert(monitorTrans);
-                DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
+                DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans, coinKind);
               }
             }
             ((List<MonitorTrans>) monitorTransListS[0]).clear();
           }
         });
-    log.info("区块大额交易监控ending");
+    log.info(coinKind + "区块大额交易监控ending");
   }
   
   /**
@@ -217,8 +219,9 @@ public class BitCommonServiceImpl implements IBitCommonService {
    * @param addrList             监控地址集合
    * @param blockWithTransaction 区块信息实例对象
    */
-  public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, BlockWithTransaction blockWithTransaction) {
-    log.info("区块地址监控beginning");
+  public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList,
+                          BlockWithTransaction blockWithTransaction, String coinKind) {
+    log.info(coinKind + "区块地址监控beginning");
     blockWithTransaction.getTx().stream()
         .forEach(txElement -> {
           // 输出地址去重累加
@@ -238,12 +241,12 @@ public class BitCommonServiceImpl implements IBitCommonService {
                       if (exist != null) {
                         String unusualCount = "+" + voutElement.getValue().toPlainString();
                         // 插入地址监控交易
-                        addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount);
+                        addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount, coinKind);
                       }
                     }
                   } catch (Exception e) {
                     e.printStackTrace();
-                    log.info("区块地址监控vout操作异常，ending");
+                    log.info(coinKind + "区块地址监控vout操作异常，ending");
                   }
                 }
               });
@@ -274,17 +277,17 @@ public class BitCommonServiceImpl implements IBitCommonService {
                       if (exist != null) {
                         String unusualCount = "-" + voutElement.getValue().toPlainString();
                         // 插入地址监控交易
-                        addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount);
+                        addrMonitorInsert(addrRuleList, blockWithTransaction, txElement, exist, unusualCount, coinKind);
                       }
                     }
                   } catch (Exception e) {
                     e.printStackTrace();
-                    log.info("区块地址监控vout操作异常，ending");
+                    log.info(coinKind + "区块地址监控vout操作异常，ending");
                   }
                 }
               });
         });
-    log.info("区块地址监控ending");
+    log.info(coinKind + "区块地址监控ending");
   }
   
   /**
@@ -318,7 +321,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
    * @param unusualCount         异动金额
    */
   private void addrMonitorInsert(List<AddrRule> addrRuleList, BlockWithTransaction blockWithTransaction, RawTransaction txElement, String
-      exist, String unusualCount) {
+      exist, String unusualCount, String coinKind) {
     if (addrRuleList != null) {
       List<Integer> addrIdList = addrRuleList.stream()
           .filter(s -> s.getAddress().equals(exist))
@@ -331,7 +334,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
             .setUnusualTime(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0, ZoneOffset.ofHours(8)))
             .setAddrRuleId(addrId);
         int rows = monitorAddrMapper.insert(monitorAddr);
-        DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getTxid(), null);
+        DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getTxid(), null, coinKind);
       });
     }
   }

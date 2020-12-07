@@ -41,11 +41,14 @@ public class BlockRpcInit implements ApplicationRunner {
   
   @Override
   public void run(ApplicationArguments args) {
+    
+    // 连接节点
     rpcUtils.bitInit(btcUrlList);
     rpcUtils.bitInit(bchUrlList);
     rpcUtils.bitInit(ltcUrlList);
     rpcUtils.bitInit(bsvUrlList);
     rpcUtils.ethInit(ethUrlList);
+    
     List<String> runList = Arrays.asList("btc", "bch", "ltc", "bsv", "eth");
     runList.parallelStream().forEach(element -> {
       switch (element) {

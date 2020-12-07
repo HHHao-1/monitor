@@ -48,10 +48,10 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
   
   public void ethMonitor() {
     log.info("ETH区块监控beginning");
-    monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1]);
+    monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH");
   }
   
-  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper) {
+  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) {
     // region 查询规则
     List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
     List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
@@ -64,6 +64,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
       try {
         maxBlockHeight = ParityPoolUtil.getMaxBlockHeight();
         if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+          log.info(coinKind + "区块监控beginning");
           maxBlockHeightOld = maxBlockHeight;
           RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
           //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
@@ -72,10 +73,10 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
           runList.stream().parallel().forEach(s -> {
             switch (s) {
               case "addr":
-                addrMonitor(addrRuleList, addrList, rawEthBlock);
+                addrMonitor(addrRuleList, addrList, rawEthBlock, coinKind);
                 break;
               case "trans":
-                transMonitor(transRuleList, transValueList, rawEthBlock);
+                transMonitor(transRuleList, transValueList, rawEthBlock, coinKind);
                 break;
             }
           });
@@ -94,8 +95,9 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    * @param transValueList       监控额度集合
    * @param blockWithTransaction 区块信息实例对象
    */
-  public void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction) {
-    log.info("区块大额交易监控beginning");
+  public void transMonitor(List<TransRule> transRuleList, List<String> transValueList,
+                           RawEthBlock blockWithTransaction, String coinKind) {
+    log.info(coinKind + "区块大额交易监控beginning");
     blockWithTransaction.getTransactions().stream()
         .filter(s -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(new BigDecimal(s.getValueRaw())) < 0).count() > 0)
         .forEach(txElement -> {
@@ -114,13 +116,13 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
                   .setToAddress(txElement.getTo())
                   .setFromAddress(txElement.getFrom());
               int rows = monitorTransMapper.insert(monitorTrans);
-              DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans);
+              DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans, coinKind);
             } catch (Exception e) {
               e.printStackTrace();
             }
           });
         });
-    log.info("区块大额交易监控ending");
+    log.info(coinKind + "区块大额交易监控ending");
   }
   
   /**
@@ -130,8 +132,8 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
    * @param addrList             监控地址集合
    * @param blockWithTransaction 区块信息实例对象
    */
-  public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction) {
-    log.info("区块地址监控beginning");
+  public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction, String coinKind) {
+    log.info(coinKind + "区块地址监控beginning");
     blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getFrom()))
         .forEach(txElement -> {
           List<Integer> addrIdList = addrRuleList.stream()
@@ -145,7 +147,7 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);
-            DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null);
+            DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null, coinKind);
           });
         });
     blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getTo()))
@@ -161,10 +163,10 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);
-            DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null);
+            DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null, coinKind);
           });
         });
-    log.info("区块地址监控ending");
+    log.info(coinKind + "区块地址监控ending");
   }
   
 }

@@ -30,46 +30,46 @@ public class DataBaseUtils {
    * @param monitorTrans 大额交易监控数据实例对象
    */
   public static void insertInspect(
-      int rows, MonitorAddr monitorAddr, String transHash, MonitorTrans monitorTrans) {
+      int rows, MonitorAddr monitorAddr, String transHash, MonitorTrans monitorTrans, String coinKind) {
     if (rows == 0) {
       if (monitorAddr != null) {
-        log.error("地址监控记录存入失败！交易哈希:" + transHash);
+        log.error(coinKind + "地址监控记录存入失败！交易哈希:" + transHash);
         // 数据库存入操作重试
         for (int i = 0; i < dataBaseRetryNum; i++) {
           if (rows == 0) {
             rows = monitorAddrMapper.insert(monitorAddr);
           } else {
-            log.info("地址监控记录重试存入操作：第" + i + "次");
+            log.info(coinKind + "地址监控记录重试存入操作：第" + i + "次");
           }
         }
       }
       if (monitorTrans != null) {
-        log.error("大额交易监控记录存入失败！交易哈希:" + transHash);
+        log.error(coinKind + "大额交易监控记录存入失败！交易哈希:" + transHash);
         // 数据库存入操作重试
         for (int i = 0; i < dataBaseRetryNum; i++) {
           if (rows == 0) {
             rows = monitorTransMapper.insert(monitorTrans);
           } else {
-            log.info("大额交易监控记录重试存入操作：第" + i + "次");
+            log.info(coinKind + "大额交易监控记录重试存入操作：第" + i + "次");
           }
         }
       }
     }
     if (rows == 0) {
       if (monitorAddr != null) {
-        log.error("地址监控记录重试存入失败！交易哈希:" + transHash);
+        log.error(coinKind + "地址监控记录重试存入失败！交易哈希:" + transHash);
         return;
       }
       if (monitorTrans != null) {
-        log.error("大额交易监控记录重试存入失败！交易哈希:" + transHash);
+        log.error(coinKind + "大额交易监控记录重试存入失败！交易哈希:" + transHash);
         return;
       }
     }
     if (monitorAddr != null) {
-      log.info("地址监控记录存入成功！");
+      log.info(coinKind + "地址监控记录存入成功！");
     }
     if (monitorTrans != null) {
-      log.info("大额交易监控记录存入成功！");
+      log.info(coinKind + "大额交易监控记录存入成功！");
     }
   }
 }
