@@ -41,11 +41,11 @@ public class RpcUtils {
   
   public QueryWrapper[] createQueryConditions(String coinKind) {
     QueryWrapper addrQueryWrapper = new QueryWrapper();
-    addrQueryWrapper.select("id", "address").eq("state", 1);
-    addrQueryWrapper.eq("coin_kind", "BCH");
+    addrQueryWrapper.select("id", "address", "user_id", "notice_way").eq("state", 1);
+    addrQueryWrapper.eq("coin_kind", coinKind);
     QueryWrapper transQueryWrapper = new QueryWrapper();
-    transQueryWrapper.select("id", "monitor_min_val").eq("state", 1);
-    transQueryWrapper.eq("coin_kind", "BCH");
+    transQueryWrapper.select("id", "monitor_min_val", "user_id", "notice_way").eq("state", 1);
+    transQueryWrapper.eq("coin_kind", coinKind);
     return new QueryWrapper[]{addrQueryWrapper, transQueryWrapper};
   }
 }

@@ -19,7 +19,7 @@ public class BitRpcServiceImpl implements IBitRpcService {
   
   public void btcMonitor() {
     try {
-      commonService.monitor(rpcUtils.createQueryConditions("BTC")[0], rpcUtils.createQueryConditions("BCH")[1], "BTC");
+      commonService.monitor(rpcUtils.createQueryConditions("BTC")[0], rpcUtils.createQueryConditions("BTC")[1], "BTC");
     } catch (Exception e) {
       e.printStackTrace();
       log.info("BTC区块监控异常，ending");
@@ -37,7 +37,7 @@ public class BitRpcServiceImpl implements IBitRpcService {
   
   public void ltcMonitor() {
     try {
-      commonService.monitor(rpcUtils.createQueryConditions("LTC")[0], rpcUtils.createQueryConditions("BCH")[1], "LTC");
+      commonService.monitor(rpcUtils.createQueryConditions("LTC")[0], rpcUtils.createQueryConditions("LTC")[1], "LTC");
     } catch (Exception e) {
       e.printStackTrace();
       log.info("LTC区块监控异常，ending");
@@ -46,7 +46,7 @@ public class BitRpcServiceImpl implements IBitRpcService {
   
   public void bsvMonitor() {
     try {
-      commonService.monitor(rpcUtils.createQueryConditions("BSV")[0], rpcUtils.createQueryConditions("BCH")[1], "BSV");
+      commonService.monitor(rpcUtils.createQueryConditions("BSV")[0], rpcUtils.createQueryConditions("BSV")[1], "BSV");
     } catch (Exception e) {
       e.printStackTrace();
       log.info("BSV区块监控异常，ending");

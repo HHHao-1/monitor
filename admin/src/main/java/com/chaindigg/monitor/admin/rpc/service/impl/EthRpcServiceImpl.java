@@ -3,15 +3,11 @@ package com.chaindigg.monitor.admin.rpc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chaindigg.monitor.admin.rpc.service.IEthRpcService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
+import com.chaindigg.monitor.admin.utils.NoticeUtils;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
-import com.chaindigg.monitor.common.dao.AddrRuleMapper;
-import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
-import com.chaindigg.monitor.common.dao.MonitorTransMapper;
-import com.chaindigg.monitor.common.dao.TransRuleMapper;
-import com.chaindigg.monitor.common.entity.AddrRule;
-import com.chaindigg.monitor.common.entity.MonitorAddr;
-import com.chaindigg.monitor.common.entity.MonitorTrans;
-import com.chaindigg.monitor.common.entity.TransRule;
+import com.chaindigg.monitor.common.dao.*;
+import com.chaindigg.monitor.common.entity.*;
+import com.google.common.base.Joiner;
 import com.zhifantech.bo.RawEthBlock;
 import com.zhifantech.util.ParityPoolUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +16,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +34,10 @@ import java.util.stream.Collectors;
 public class EthRpcServiceImpl implements IEthRpcService {
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
+  @Value("${addr-monitor-templateCode}")
+  String addrSmsTemplateCode;
+  @Value("${trans-monitor-templateCode}")
+  String transSmsTemplateCode;
   
   @Resource
   private AddrRuleMapper addrRuleMapper;
@@ -44,10 +48,21 @@ public class EthRpcServiceImpl implements IEthRpcService {
   @Resource
   private MonitorTransMapper monitorTransMapper;
   @Resource
+  private UserMapper userMapper;
+  @Resource
   private RpcUtils rpcUtils;
   
+  String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
+  String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
+  
+  
   public void ethMonitor() {
-    monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH");
+    try {
+      monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH");
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.info("ETH区块监控异常ending");
+    }
   }
   
   public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) {
@@ -62,27 +77,34 @@ public class EthRpcServiceImpl implements IEthRpcService {
     while (true) {
       try {
         maxBlockHeight = ParityPoolUtil.getMaxBlockHeight();
-        if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
-          log.info(coinKind + "区块监控beginning");
-          maxBlockHeightOld = maxBlockHeight;
-          RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
-          //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
-          //      log.info(rawEthBlock.toString());
-          List<String> runList = Arrays.asList("addr", "trans");
-          runList.stream().parallel().forEach(s -> {
-            switch (s) {
-              case "addr":
-                addrMonitor(addrRuleList, addrList, rawEthBlock, coinKind);
-                break;
-              case "trans":
-                transMonitor(transRuleList, transValueList, rawEthBlock, coinKind);
-                break;
-            }
-          });
-        }
       } catch (Exception e) {
         e.printStackTrace();
-        log.info("ETH区块监控异常，ending");
+        log.info("获取区块高度异常");
+      }
+      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+        log.info(coinKind + "区块监控beginning");
+        maxBlockHeightOld = maxBlockHeight;
+        RawEthBlock rawEthBlock = null;
+        try {
+          rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
+        } catch (Exception e) {
+          e.printStackTrace();
+          log.info("获取区块信息异常");
+        }
+        //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
+        //      log.info(rawEthBlock.toString());
+        List<String> runList = Arrays.asList("addr", "trans");
+        RawEthBlock finalRawEthBlock = rawEthBlock;
+        runList.stream().parallel().forEach(s -> {
+          switch (s) {
+            case "addr":
+              addrMonitor(addrRuleList, addrList, finalRawEthBlock, coinKind);
+              break;
+            case "trans":
+              transMonitor(transRuleList, transValueList, finalRawEthBlock, coinKind);
+              break;
+          }
+        });
       }
     }
   }
@@ -100,11 +122,63 @@ public class EthRpcServiceImpl implements IEthRpcService {
     blockWithTransaction.getTransactions().stream()
         .filter(s -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(new BigDecimal(s.getValueRaw())) < 0).count() > 0)
         .forEach(txElement -> {
+          List<TransRule> matchRuleList = transRuleList.stream()
+              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
+              .collect(Collectors.toList());
           List<Integer> transIdList = transRuleList.stream()
               .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
               .map(TransRule::getId)
               .collect(Collectors.toList());
+          List<Integer> userIdList = matchRuleList.stream()
+              .map(TransRule::getUserId)
+              .collect(Collectors.toList());
           transIdList.forEach(transId -> {
+            // region 通知数据
+            String monitorKind = "大额交易";
+            // 邮件
+            String mailContent = null;
+            try {
+              mailContent = Joiner.on("").join(Files.lines(Paths.get(transMailHtmlPath)).collect(Collectors.toList()));
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+                mailContent,
+                "未知",
+                monitorKind,
+                txElement.getValueRaw(),
+                txElement.getFrom(),
+                txElement.getTo(),
+                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8)).toString(),
+                txElement.getHash());
+            // 短信
+            ArrayList<String> smsParams = new ArrayList<>();
+            smsParams.add(coinKind);
+            smsParams.add(txElement.getValueRaw());
+            smsParams.add(txElement.getTo());
+            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8)).toString());
+            // endregion
+            // region 中间List
+            QueryWrapper<User> userQuery = new QueryWrapper<>();
+            userQuery.in("id", userIdList).eq("state", 1);
+            List<User> userList = userMapper.selectList(userQuery);
+            // endregion
+            
+            matchRuleList.forEach(addrRule -> {
+              // region 通知
+              User noticeUser =
+                  userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
+              try {
+                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail);
+              } catch (Exception e) {
+                e.printStackTrace();
+                log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
+              }
+              // endregion
+            });
             MonitorTrans monitorTrans = new MonitorTrans();
             try {
               monitorTrans
@@ -135,12 +209,62 @@ public class EthRpcServiceImpl implements IEthRpcService {
     log.info(coinKind + "区块地址监控beginning");
     blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getFrom()))
         .forEach(txElement -> {
-          List<Integer> addrIdList = addrRuleList.stream()
+          List<AddrRule> matchRuleList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getFrom()))
+              .collect(Collectors.toList());
+          List<Integer> addrIdList = matchRuleList.stream()
               .map(AddrRule::getId)
               .collect(Collectors.toList());
+          List<Integer> userIdList = matchRuleList.stream()
+              .map(AddrRule::getUserId)
+              .collect(Collectors.toList());
           addrIdList.forEach(addrId -> {
-            final MonitorAddr monitorAddr = new MonitorAddr();
+            // region 通知数据
+            String monitorKind = "地址";
+            // 邮件
+            String mailContent = null;
+            try {
+              mailContent = Joiner.on("").join(Files.lines(Paths.get(addrMailHtmlPath)).collect(Collectors.toList()));
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+                mailContent,
+                "未知",
+                monitorKind,
+                "-" + txElement.getValueRaw(),
+                txElement.getFrom(),
+                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8)).toString(),
+                txElement.getHash());
+            // 短信
+            ArrayList<String> smsParams = new ArrayList<>();
+            smsParams.add(coinKind);
+            smsParams.add("-" + txElement.getValueRaw());
+            smsParams.add(txElement.getFrom());
+            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8)).toString());
+            // endregion
+            // region 中间List
+            QueryWrapper<User> userQuery = new QueryWrapper<>();
+            userQuery.in("id", userIdList).eq("state", 1);
+            List<User> userList = userMapper.selectList(userQuery);
+            // endregion
+            
+            matchRuleList.forEach(addrRule -> {
+              // region 通知
+              User noticeUser =
+                  userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
+              try {
+                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, addrSmsTemplateCode, smsParams, formatMail);
+              } catch (Exception e) {
+                e.printStackTrace();
+                log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
+              }
+              // endregion
+            });
+            MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
                 .setUnusualCount("-" + txElement.getValueRaw())
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
@@ -151,11 +275,62 @@ public class EthRpcServiceImpl implements IEthRpcService {
         });
     blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getTo()))
         .forEach(txElement -> {
+          List<AddrRule> matchRuleList = addrRuleList.stream()
+              .filter(s -> s.getAddress().equals(txElement.getTo()))
+              .collect(Collectors.toList());
           List<Integer> addrIdList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getTo()))
               .map(AddrRule::getId)
               .collect(Collectors.toList());
+          List<Integer> userIdList = matchRuleList.stream()
+              .map(AddrRule::getUserId)
+              .collect(Collectors.toList());
           addrIdList.forEach(addrId -> {
+            // region 通知数据
+            String monitorKind = "地址";
+            // 邮件
+            String mailContent = null;
+            try {
+              mailContent = Joiner.on("").join(Files.lines(Paths.get(addrMailHtmlPath)).collect(Collectors.toList()));
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+                mailContent,
+                "未知",
+                monitorKind,
+                "+" + txElement.getValueRaw(),
+                txElement.getFrom(),
+                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8)).toString(),
+                txElement.getHash());
+            // 短信
+            ArrayList<String> smsParams = new ArrayList<>();
+            smsParams.add(coinKind);
+            smsParams.add("+" + txElement.getValueRaw());
+            smsParams.add(txElement.getTo());
+            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8)).toString());
+            // endregion
+            // region 中间List
+            QueryWrapper<User> userQuery = new QueryWrapper<>();
+            userQuery.in("id", userIdList).eq("state", 1);
+            List<User> userList = userMapper.selectList(userQuery);
+            // endregion
+            
+            matchRuleList.forEach(addrRule -> {
+              // region 通知
+              User noticeUser =
+                  userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
+              try {
+                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail);
+              } catch (Exception e) {
+                e.printStackTrace();
+                log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
+              }
+              // endregion
+            });
             final MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
                 .setUnusualCount("+" + txElement.getValueRaw())

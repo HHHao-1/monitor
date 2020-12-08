@@ -44,9 +44,9 @@ public class RealTimeBlockMonitor implements ApplicationRunner {
     
     // 连接节点
     rpcUtils.bitInit(btcUrlList);
-    rpcUtils.bitInit(bchUrlList);
-    rpcUtils.bitInit(ltcUrlList);
-    rpcUtils.bitInit(bsvUrlList);
+//    rpcUtils.bitInit(bchUrlList);
+//    rpcUtils.bitInit(ltcUrlList);
+//    rpcUtils.bitInit(bsvUrlList);
     rpcUtils.ethInit(ethUrlList);
     
     // 多币种监控并行运行
@@ -56,18 +56,18 @@ public class RealTimeBlockMonitor implements ApplicationRunner {
         case "btc":
           bitRpcInitService.btcMonitor();
           break;
-        case "bch":
-          bitRpcInitService.bchMonitor();
-          break;
-        case "ltc":
-          bitRpcInitService.ltcMonitor();
-          break;
-        case "bsv":
-          bitRpcInitService.bsvMonitor();
-          break;
-        case "eth":
-          ethRpcInitService.ethMonitor();
-          break;
+//        case "bch":
+//          bitRpcInitService.bchMonitor();
+//          break;
+//        case "ltc":
+//          bitRpcInitService.ltcMonitor();
+//          break;
+//        case "bsv":
+//          bitRpcInitService.bsvMonitor();
+//          break;
+//        case "eth":
+//          ethRpcInitService.ethMonitor();
+//          break;
       }
     });
   }
