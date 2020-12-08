@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.utils;
+package com.chaindigg.monitor.common.utils;
 
 import com.zhifantech.base.mail.service.MailService;
 import com.zhifantech.base.mail.service.MailServiceImpl;

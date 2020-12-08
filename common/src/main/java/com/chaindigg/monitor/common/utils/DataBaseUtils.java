@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.utils;
+package com.chaindigg.monitor.common.utils;
 
 import com.chaindigg.monitor.common.dao.MonitorAddrMapper;
 import com.chaindigg.monitor.common.dao.MonitorTransMapper;

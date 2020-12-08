@@ -1,12 +1,13 @@
-package com.chaindigg.monitor.admin.rpc.service.impl;
+package com.chaindigg.monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.rpc.service.IEthRpcService;
-import com.chaindigg.monitor.admin.utils.DataBaseUtils;
-import com.chaindigg.monitor.admin.utils.NoticeUtils;
-import com.chaindigg.monitor.admin.utils.RpcUtils;
 import com.chaindigg.monitor.common.dao.*;
 import com.chaindigg.monitor.common.entity.*;
+import com.chaindigg.monitor.common.utils.DataBaseUtils;
+import com.chaindigg.monitor.common.utils.NoticeUtils;
+import com.chaindigg.monitor.common.utils.RpcUtils;
+import com.chaindigg.monitor.common.utils.StringUtils;
+import com.chaindigg.monitor.service.IEthRpcService;
 import com.google.common.base.Joiner;
 import com.zhifantech.bo.RawEthBlock;
 import com.zhifantech.util.ParityPoolUtil;
@@ -142,7 +143,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             } catch (IOException e) {
               e.printStackTrace();
             }
-            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+            String formatMail = StringUtils.templateString(
                 mailContent,
                 "未知",
                 monitorKind,
@@ -228,7 +229,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             } catch (IOException e) {
               e.printStackTrace();
             }
-            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+            String formatMail = StringUtils.templateString(
                 mailContent,
                 "未知",
                 monitorKind,
@@ -295,7 +296,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             } catch (IOException e) {
               e.printStackTrace();
             }
-            String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+            String formatMail = StringUtils.templateString(
                 mailContent,
                 "未知",
                 monitorKind,

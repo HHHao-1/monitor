@@ -1,11 +1,11 @@
-package com.chaindigg.monitor.admin.rpc.service.impl;
+package com.chaindigg.monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.rpc.service.IBitCommonService;
-import com.chaindigg.monitor.admin.utils.DataBaseUtils;
-import com.chaindigg.monitor.admin.utils.NoticeUtils;
 import com.chaindigg.monitor.common.dao.*;
 import com.chaindigg.monitor.common.entity.*;
+import com.chaindigg.monitor.common.utils.DataBaseUtils;
+import com.chaindigg.monitor.common.utils.NoticeUtils;
+import com.chaindigg.monitor.service.IBitCommonService;
 import com.google.common.base.Joiner;
 import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import com.sulacosoft.bitcoindconnector4j.response.RawTransaction;
@@ -137,7 +137,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         } catch (IOException e) {
                           e.printStackTrace();
                         }
-                        String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+                        String formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                             mailContent,
                             "未知",
                             monitorKind,
@@ -228,7 +228,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         } catch (IOException e) {
                           e.printStackTrace();
                         }
-                        String formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+                        String formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                             mailContent,
                             "未知",
                             monitorKind,
@@ -363,7 +363,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                 e.printStackTrace();
               }
               String formatMail = null;
-              formatMail = com.chaindigg.monitor.admin.utils.StringUtils.templateString(
+              formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                   mailContent,
                   "未知",
                   monitorKind,

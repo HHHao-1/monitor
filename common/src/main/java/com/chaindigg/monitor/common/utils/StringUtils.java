@@ -1,4 +1,4 @@
-package com.chaindigg.monitor.admin.utils;
+package com.chaindigg.monitor.common.utils;
 
 public class StringUtils {
   public static String templateString(String origin, String... args) {
