@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin.rpc.service.impl;
 
 import com.chaindigg.monitor.admin.rpc.service.IBitCommonService;
-import com.chaindigg.monitor.admin.rpc.service.IBitRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IBitRpcService;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 
 @Slf4j
 @Service
-public class BitRpcInitServiceImpl implements IBitRpcInitService {
+public class BitRpcServiceImpl implements IBitRpcService {
   
   @Resource
   private IBitCommonService commonService;

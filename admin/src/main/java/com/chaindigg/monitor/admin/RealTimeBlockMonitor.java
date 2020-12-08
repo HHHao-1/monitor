@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin;
 
-import com.chaindigg.monitor.admin.rpc.service.IBitRpcInitService;
-import com.chaindigg.monitor.admin.rpc.service.IEthRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IBitRpcService;
+import com.chaindigg.monitor.admin.rpc.service.IEthRpcService;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +35,9 @@ public class RealTimeBlockMonitor implements ApplicationRunner {
   
   // RpcService
   @Resource
-  private IBitRpcInitService bitRpcInitService;
+  private IBitRpcService bitRpcInitService;
   @Resource
-  private IEthRpcInitService ethRpcInitService;
+  private IEthRpcService ethRpcInitService;
   
   @Override
   public void run(ApplicationArguments args) {

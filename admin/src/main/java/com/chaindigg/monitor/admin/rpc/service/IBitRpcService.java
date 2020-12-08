@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin.rpc.service;
 
 
-public interface IBitRpcInitService {
+public interface IBitRpcService {
   
   void btcMonitor();
   

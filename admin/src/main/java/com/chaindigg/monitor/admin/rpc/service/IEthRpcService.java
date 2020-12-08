@@ -7,7 +7,7 @@ import com.zhifantech.bo.RawEthBlock;
 
 import java.util.List;
 
-public interface IEthRpcInitService {
+public interface IEthRpcService {
   
   void ethMonitor();
   

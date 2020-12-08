@@ -1,7 +1,7 @@
 package com.chaindigg.monitor.admin.rpc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chaindigg.monitor.admin.rpc.service.IEthRpcInitService;
+import com.chaindigg.monitor.admin.rpc.service.IEthRpcService;
 import com.chaindigg.monitor.admin.utils.DataBaseUtils;
 import com.chaindigg.monitor.admin.utils.RpcUtils;
 import com.chaindigg.monitor.common.dao.AddrRuleMapper;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @PropertySource(value = {"classpath:config.properties"})
-public class EthRpcInitServiceImpl implements IEthRpcInitService {
+public class EthRpcServiceImpl implements IEthRpcService {
   @Value("${database-retry-num}") // insert重试次数
   private int dataBaseRetryNum;
   
