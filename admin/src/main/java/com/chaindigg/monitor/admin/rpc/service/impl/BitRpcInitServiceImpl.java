@@ -45,7 +45,6 @@ public class BitRpcInitServiceImpl implements IBitRpcInitService {
   }
   
   public void bsvMonitor() {
-    log.info("BSV区块监控beginning");
     try {
       commonService.monitor(rpcUtils.createQueryConditions("BSV")[0], rpcUtils.createQueryConditions("BCH")[1], "BSV");
     } catch (Exception e) {

@@ -47,7 +47,6 @@ public class EthRpcInitServiceImpl implements IEthRpcInitService {
   private RpcUtils rpcUtils;
   
   public void ethMonitor() {
-    log.info("ETH区块监控beginning");
     monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH");
   }
   

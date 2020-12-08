@@ -159,7 +159,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
               });
           // 规则匹配信息存入数据库
           if (((List<RawTransaction.Vout>) existListS[0]).size() != 0) {
-            // 交易输出地址
+            // 获取交易vin地址
             txElement.getVin().stream()
                 .forEach(vinElement -> {
                   if (vinElement.getTxid() != null) {
@@ -172,7 +172,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                       }
                     } catch (Exception e) {
                       e.printStackTrace();
-                      log.info(coinKind + "获取交易输出地址异常");
+                      log.info(coinKind + "获取交易vin异常");
                     }
                   }
                 });
