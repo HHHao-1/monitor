@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
   String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
   String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
   
+  DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   
   public void ethMonitor() {
     try {
@@ -145,21 +147,21 @@ public class EthRpcServiceImpl implements IEthRpcService {
             }
             String formatMail = StringUtils.templateString(
                 mailContent,
-                "未知",
+                coinKind,
                 monitorKind,
                 txElement.getValueRaw(),
                 txElement.getFrom(),
                 txElement.getTo(),
-                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                    ZoneOffset.ofHours(8)).toString(),
+                dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
             smsParams.add(txElement.getValueRaw());
             smsParams.add(txElement.getTo());
-            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8)).toString());
+            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();
@@ -231,20 +233,20 @@ public class EthRpcServiceImpl implements IEthRpcService {
             }
             String formatMail = StringUtils.templateString(
                 mailContent,
-                "未知",
+                coinKind,
                 monitorKind,
                 "-" + txElement.getValueRaw(),
                 txElement.getFrom(),
-                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                    ZoneOffset.ofHours(8)).toString(),
+                dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
             smsParams.add("-" + txElement.getValueRaw());
             smsParams.add(txElement.getFrom());
-            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8)).toString());
+            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();
@@ -298,20 +300,20 @@ public class EthRpcServiceImpl implements IEthRpcService {
             }
             String formatMail = StringUtils.templateString(
                 mailContent,
-                "未知",
+                coinKind,
                 monitorKind,
                 "+" + txElement.getValueRaw(),
                 txElement.getFrom(),
-                LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                    ZoneOffset.ofHours(8)).toString(),
+                dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                    ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
             smsParams.add("+" + txElement.getValueRaw());
             smsParams.add(txElement.getTo());
-            smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8)).toString());
+            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();

@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +56,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
   String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
   String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
   
+  DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   
   public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) {
     // region 查询规则
@@ -114,7 +116,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
     blockWithTransaction.getTx().stream()
         .forEach(txElement -> {
           // 输出地址去重累加
-          List<RawTransaction.Vout> txVout = addrAddUp(txElement);
+          List<RawTransaction.Vout> txVout = addrAddUp(txElement.getVout());
           txVout.stream()
               .forEach(voutElement -> {
                 if (voutElement.getScriptPubKey().getAddresses() != null) {
@@ -139,20 +141,20 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         }
                         String formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                             mailContent,
-                            "未知",
+                            coinKind,
                             monitorKind,
                             unusualCount,
                             exist,
-                            LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
-                                ZoneOffset.ofHours(8)).toString(),
+                            dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+                                ZoneOffset.ofHours(8))),
                             txElement.getTxid());
                         // 短信
                         ArrayList<String> smsParams = new ArrayList<>();
                         smsParams.add(coinKind);
                         smsParams.add(exist);
                         smsParams.add(unusualCount);
-                        smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
-                            ZoneOffset.ofHours(8)).toString());
+                        smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+                            ZoneOffset.ofHours(8))));
                         // endregion
                         String finalFormatMail = formatMail;
                         String finalExist = exist;
@@ -230,7 +232,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         }
                         String formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                             mailContent,
-                            "未知",
+                            coinKind,
                             monitorKind,
                             unusualCount,
                             exist,
@@ -284,44 +286,265 @@ public class BitCommonServiceImpl implements IBitCommonService {
     blockWithTransaction.getTx().stream()
         .forEach(txElement -> {
           // 输出地址累加去重
-          List<RawTransaction.Vout> txVout = addrAddUp(txElement);
+          List<RawTransaction.Vout> txVout = addrAddUp(txElement.getVout());
           // 输出地址遍历匹配
-          txVout.stream()
+          txVout.stream().filter(txvo -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(txvo.getValue()) < 0).count() > 0)
               .forEach(voutElement -> {
-                if (voutElement.getValue() != null) {
-                  try {
-                    String voutValue = voutElement.getValue().toPlainString();
-                    // 根据规则配配到的元素
-                    String exist = null;
-                    // 大额交易匹配
-                    if (transRuleList != null) {
-                      // 扫描交易vout
-                      if (voutValue != null) {
-                        List<String> list = transValueList.stream()
-                            .filter(s -> new BigDecimal(s).compareTo(new BigDecimal(voutValue)) < 0)
-                            .collect(Collectors.toList());
-                        if (list.size() != 0) {
-                          try {
-                            exist = voutElement.getScriptPubKey().getAddresses().get(0);
-                          } catch (Exception e) {
-                            e.printStackTrace();
-                          }
-                        }
-                      }
-                      if (exist != null) {
-                        String unusualCount = voutElement.getValue().toPlainString();
-                        // 判断匹配地址是否是找零地址
-                        if (!vinAddrList.contains(exist)) {
-                          ((List<RawTransaction.Vout>) existListS[0]).add(voutElement);
-                        }
-                      }
+                try {
+                  // 中间List
+                  List<TransRule> matchRuleList = transRuleList.stream()
+                      .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(voutElement.getValue()) < 0)
+                      .collect(Collectors.toList());
+                  
+                  List<Integer> transIdList = matchRuleList.stream()
+                      .map(TransRule::getId)
+                      .collect(Collectors.toList());
+                  
+                  List<Integer> userIdList = matchRuleList.stream()
+                      .map(TransRule::getUserId)
+                      .collect(Collectors.toList());
+                  
+                  QueryWrapper<User> userQuery = new QueryWrapper<>();
+                  userQuery.in("id", userIdList).eq("state", 1);
+                  List<User> userList = userMapper.selectList(userQuery);
+//                if (voutElement.getValue() != null) {
+//                  try {
+//                    String voutValue = voutElement.getValue().toPlainString();
+//                    // 根据规则配配到的元素
+//                    String exist = null;
+//                    // 大额交易匹配
+//                    if (transRuleList != null) {
+//                      // 扫描交易vout
+//                      if (voutValue != null) {
+//                        List<String> list = transValueList.stream()
+//                            .filter(s -> new BigDecimal(s).compareTo(new BigDecimal(voutValue)) < 0)
+//                            .collect(Collectors.toList());
+//                        if (list.size() != 0) {
+//                          try {
+//                            exist = voutElement.getScriptPubKey().getAddresses().get(0);
+//                          } catch (Exception e) {
+//                            e.printStackTrace();
+//                          }
+//                        }
+//                      }
+//                      if (exist != null) {
+                  String exist = voutElement.getScriptPubKey().getAddresses().get(0);
+                  // 判断匹配地址是否是找零地址
+                  if (!vinAddrList.contains(exist)) {
+                    ((List<RawTransaction.Vout>) existListS[0]).add(voutElement);
+                    // 变量：交易时间
+                    LocalDateTime transTime = LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+                        ZoneOffset.ofHours(8));
+                    // 判断输入地址是否为一个
+                    String fromAddr = null;
+                    if (txElement.getVin().size() <= 1) {
+                      RawTransaction.Vout vinOut = BitcoindPoolUtil.getVout(txElement.getVin().get(0).getTxid(),
+                          txElement.getVin().get(0).getVout());
+                      fromAddr =
+                          StringUtils.join(((List<String>) vinAddrListS[0]).stream().collect(Collectors.toSet()), ",");
                     }
-                  } catch (Exception e) {
-                    e.printStackTrace();
-                    log.info(coinKind + "区块大额交易监控vout操作异常，ending");
+                    // region 通知数据处理
+                    // 邮件
+                    String mailContent = null;
+                    String monitorKind = "大额交易";
+                    try {
+                      mailContent =
+                          Joiner.on("").join(Files.lines(Paths.get(transMailHtmlPath)).collect(Collectors.toList()));
+                      System.out.println(mailContent);
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    }
+                    String formatMail = null;
+                    formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
+                        mailContent,
+                        coinKind,
+                        monitorKind,
+                        voutElement.getValue().toPlainString(),
+                        fromAddr,
+                        exist,
+                        dtf.format(transTime),
+                        txElement.getTxid());
+                    // 短信
+                    ArrayList<String> smsParams = new ArrayList<>();
+                    smsParams.add(coinKind);
+                    smsParams.add(voutElement.getValue().toPlainString());
+                    smsParams.add(exist);
+                    smsParams.add(dtf.format(transTime));
+                    // endregion
+                    String finalFromAddr = fromAddr;
+                    String finalFormatMail = formatMail;
+                    matchRuleList.forEach(transRule -> {
+                      // region 通知
+                      User noticeUser =
+                          userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().get();
+                      try {
+                        NoticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                            monitorKind, transSmsTemplateCode, smsParams, finalFormatMail);
+                      } catch (Exception e) {
+                        e.printStackTrace();
+                        log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getTxid());
+                      }
+                      // endregion
+                      MonitorTrans monitorTrans = new MonitorTrans();
+                      try {
+                        monitorTrans
+                            .setTransHash(txElement.getTxid())
+                            .setUnusualCount(voutElement.getValue().toPlainString())
+                            .setUnusualTime(transTime)
+                            .setTransRuleId(transRule.getId())
+                            .setToAddress(exist)
+                            .setFromAddress(finalFromAddr)
+                            .setNoticeTime(LocalDateTime.now());
+                        int rows = monitorTransMapper.insert(monitorTrans);
+                        DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans, coinKind);
+                      } catch (Exception e) {
+                        e.printStackTrace();
+                      }
+                    });
                   }
+//                      }
+//                    }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  log.info(coinKind + "区块大额交易监控vout操作异常，ending");
                 }
+//                }
               });
+          List<RawTransaction.Vout> txVinList = null;
+          txElement.getVin().stream().forEach(txvi -> {
+            try {
+              RawTransaction.Vout vinOut = BitcoindPoolUtil.getVout(txvi.getTxid(), txvi.getVout());
+              txVinList.add(vinOut);
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          });
+          // 输出地址累加去重
+          List<RawTransaction.Vout> txVin = addrAddUp(txVinList);
+          txVin.stream().filter(txvi -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(txvi.getValue()) < 0).count() > 0)
+              .forEach(vinElement -> {
+                try {
+                  // 中间List
+                  List<TransRule> matchRuleList = transRuleList.stream()
+                      .filter(s -> new BigDecimal(s.getMonitorMinVal()).compareTo(vinElement.getValue()) < 0)
+                      .collect(Collectors.toList());
+                  
+                  List<Integer> transIdList = matchRuleList.stream()
+                      .map(TransRule::getId)
+                      .collect(Collectors.toList());
+                  
+                  List<Integer> userIdList = matchRuleList.stream()
+                      .map(TransRule::getUserId)
+                      .collect(Collectors.toList());
+                  
+                  QueryWrapper<User> userQuery = new QueryWrapper<>();
+                  userQuery.in("id", userIdList).eq("state", 1);
+                  List<User> userList = userMapper.selectList(userQuery);
+//                if (voutElement.getValue() != null) {
+//                  try {
+//                    String voutValue = voutElement.getValue().toPlainString();
+//                    // 根据规则配配到的元素
+//                    String exist = null;
+//                    // 大额交易匹配
+//                    if (transRuleList != null) {
+//                      // 扫描交易vout
+//                      if (voutValue != null) {
+//                        List<String> list = transValueList.stream()
+//                            .filter(s -> new BigDecimal(s).compareTo(new BigDecimal(voutValue)) < 0)
+//                            .collect(Collectors.toList());
+//                        if (list.size() != 0) {
+//                          try {
+//                            exist = voutElement.getScriptPubKey().getAddresses().get(0);
+//                          } catch (Exception e) {
+//                            e.printStackTrace();
+//                          }
+//                        }
+//                      }
+//                      if (exist != null) {
+                  String exist = vinElement.getScriptPubKey().getAddresses().get(0);
+                  // 判断匹配地址是否是找零地址
+                  if (!vinAddrList.contains(exist)) {
+                    ((List<RawTransaction.Vout>) existListS[0]).add(vinElement);
+                    // 变量：交易时间
+                    LocalDateTime transTime = LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+                        ZoneOffset.ofHours(8));
+                    // 判断输入地址是否为一个
+                    String fromAddr = null;
+                    if (txElement.getVin().size() <= 1) {
+                      RawTransaction.Vout vinOut = BitcoindPoolUtil.getVout(txElement.getVin().get(0).getTxid(),
+                          txElement.getVin().get(0).getVout());
+                      fromAddr =
+                          StringUtils.join(((List<String>) vinAddrListS[0]).stream().collect(Collectors.toSet()), ",");
+                    }
+                    // region 通知数据处理
+                    // 邮件
+                    String mailContent = null;
+                    String monitorKind = "大额交易";
+                    try {
+                      mailContent =
+                          Joiner.on("").join(Files.lines(Paths.get(transMailHtmlPath)).collect(Collectors.toList()));
+                      System.out.println(mailContent);
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    }
+                    String formatMail = null;
+                    formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
+                        mailContent,
+                        coinKind,
+                        monitorKind,
+                        vinElement.getValue().toPlainString(),
+                        fromAddr,
+                        exist,
+                        dtf.format(transTime),
+                        txElement.getTxid());
+                    // 短信
+                    ArrayList<String> smsParams = new ArrayList<>();
+                    smsParams.add(coinKind);
+                    smsParams.add(vinElement.getValue().toPlainString());
+                    smsParams.add(exist);
+                    smsParams.add(dtf.format(transTime));
+                    // endregion
+                    String finalFromAddr = fromAddr;
+                    String finalFormatMail = formatMail;
+                    matchRuleList.forEach(transRule -> {
+                      // region 通知
+                      User noticeUser =
+                          userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().get();
+                      try {
+                        NoticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                            monitorKind, transSmsTemplateCode, smsParams, finalFormatMail);
+                      } catch (Exception e) {
+                        e.printStackTrace();
+                        log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getTxid());
+                      }
+                      // endregion
+                      MonitorTrans monitorTrans = new MonitorTrans();
+                      try {
+                        monitorTrans
+                            .setTransHash(txElement.getTxid())
+                            .setUnusualCount(vinElement.getValue().toPlainString())
+                            .setUnusualTime(transTime)
+                            .setTransRuleId(transRule.getId())
+                            .setToAddress(exist)
+                            .setFromAddress(finalFromAddr)
+                            .setNoticeTime(LocalDateTime.now());
+                        int rows = monitorTransMapper.insert(monitorTrans);
+                        DataBaseUtils.insertInspect(rows, null, monitorTrans.getTransHash(), monitorTrans, coinKind);
+                      } catch (Exception e) {
+                        e.printStackTrace();
+                      }
+                    });
+                  }
+//                      }
+//                    }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  log.info(coinKind + "区块大额交易监控vout操作异常，ending");
+                }
+//                }
+              });
+          
+          
           // 规则匹配信息存入数据库
           if (((List<RawTransaction.Vout>) existListS[0]).size() != 0) {
             // 获取交易vin地址
@@ -365,19 +588,19 @@ public class BitCommonServiceImpl implements IBitCommonService {
               String formatMail = null;
               formatMail = com.chaindigg.monitor.common.utils.StringUtils.templateString(
                   mailContent,
-                  "未知",
+                  coinKind,
                   monitorKind,
                   vout.getValue().toPlainString(),
                   fromAddr,
                   vout.getScriptPubKey().getAddresses().get(0),
-                  transTime.toString(),
+                  dtf.format(transTime),
                   txElement.getTxid());
               // 短信
               ArrayList<String> smsParams = new ArrayList<>();
               smsParams.add(coinKind);
               smsParams.add(vout.getValue().toPlainString());
               smsParams.add(vout.getScriptPubKey().getAddresses().get(0));
-              smsParams.add(transTime.toString());
+              smsParams.add(dtf.format(transTime));
               // endregion
               
               // region 中间List
@@ -460,8 +683,8 @@ public class BitCommonServiceImpl implements IBitCommonService {
    * @param txElement 交易元素
    * @return 返回累加去重后的交易vout
    */
-  private List<RawTransaction.Vout> addrAddUp(RawTransaction txElement) {
-    List<RawTransaction.Vout> txVout = txElement.getVout().stream()
+  private List<RawTransaction.Vout> addrAddUp(List<RawTransaction.Vout> voutList) {
+    List<RawTransaction.Vout> txVout = voutList.stream()
         .collect(Collectors.toMap(
             k -> {
               if (k.getScriptPubKey().getAddresses() != null) {
