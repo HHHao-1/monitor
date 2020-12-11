@@ -12,7 +12,7 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface IAddrRuleVOService extends IService<AddrRuleVO> {
-
+  
   List<AddrRuleVO> selectAll(
-      String event, String userName, String userId, int currentPage, int pageSize);
+      String event, String userName, String userId, Integer currentPage, Integer pageSize);
 }

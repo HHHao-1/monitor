@@ -12,11 +12,11 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface INoticeLogService extends IService<NoticeLogVO> {
-
-  List<NoticeLogVO> selectAddrAll(String eventName, String coinKind, int currentPage, int pageSize);
-
-  List<NoticeLogVO> selectTransAll(String coinKind, int currentPage, int pageSize);
-
+  
+  List<NoticeLogVO> selectAddrAll(String eventName, String coinKind, Integer currentPage, Integer pageSize);
+  
+  List<NoticeLogVO> selectTransAll(String coinKind, Integer currentPage, Integer pageSize);
+  
   List<NoticeLogVO> selectAll(
-      String monitorType, String eventName, String coinKind, int currentPage, int pageSize);
+      String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize);
 }

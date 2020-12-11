@@ -23,9 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AddrRuleVOServiceImpl extends ServiceImpl<AddrRuleVOMapper, AddrRuleVO>
     implements IAddrRuleVOService {
-
+  
   public List<AddrRuleVO> selectAll(
-      String event, String userName, String userId, int currentPage, int pageSize) {
+      String event, String userName, String userId, Integer currentPage, Integer pageSize) {
     IPage<AddrRuleVO> page = new Page<AddrRuleVO>(currentPage, pageSize);
     QueryWrapper<AddrRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("a.id");

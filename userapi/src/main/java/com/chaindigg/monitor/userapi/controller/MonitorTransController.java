@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MonitorTransController {
   private final IMonitorTransVOService monitorTransVOService;
   private final IMonitorTransService monitorTransService;
-
+  
   @GetMapping("/monitor-trans")
-  public ApiResponse getMonitorTransListByUserId(String id, int currentPage, int pageSize) {
+  public ApiResponse getMonitorTransListByUserId(String id, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, monitorTransVOService.selectByUserId(id, currentPage, pageSize));
@@ -25,7 +25,7 @@ public class MonitorTransController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/monitor-trans")
   public ApiResponse getMonitorTransList(MonitorTrans monitorTrans) {
     try {

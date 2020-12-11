@@ -22,14 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MonitorTransVOServiceImpl extends ServiceImpl<MonitorTransVOMapper, MonitorTransVO>
     implements IMonitorTransVOService {
-
+  
   private final MonitorTransVOMapper monitorTransVOMapper;
-
+  
   @Override
-  public List<MonitorTransVO> selectByUserId(String id, int currentPage, int pageSize) {
+  public List<MonitorTransVO> selectByUserId(String id, Integer currentPage, Integer pageSize) {
     IPage<MonitorTransVO> page = new Page<MonitorTransVO>(currentPage, pageSize);
     QueryWrapper<MonitorTransVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("b.id", id).orderByDesc("a,id");
+    queryWrapper.eq("b.user_id", id).orderByDesc("a,id");
     return monitorTransVOMapper.selectByUserId(page, queryWrapper).getRecords();
   }
 }

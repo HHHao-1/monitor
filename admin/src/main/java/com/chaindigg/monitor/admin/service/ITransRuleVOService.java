@@ -12,7 +12,7 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface ITransRuleVOService extends IService<TransRuleVO> {
-
+  
   List<TransRuleVO> selectAll(
-      String coin, String userName, String userId, int currentPage, int pageSize);
+      String coin, String userName, String userId, Integer currentPage, Integer pageSize);
 }

@@ -1,8 +1,8 @@
 package com.chaindigg.monitor.service.impl;
 
-import com.chaindigg.monitor.common.utils.RpcUtils;
 import com.chaindigg.monitor.service.IBitCommonService;
 import com.chaindigg.monitor.service.IBitRpcService;
+import com.chaindigg.monitor.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -12,7 +12,7 @@ public class UserController {
   private final IUserService userService;
   
   @GetMapping("/users")
-  public ApiResponse getUsers(String name, int currentPage, int pageSize) {
+  public ApiResponse getUsers(String name, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(State.SUCCESS, userService.selectAll(name, currentPage, pageSize));
     } catch (Exception e) {

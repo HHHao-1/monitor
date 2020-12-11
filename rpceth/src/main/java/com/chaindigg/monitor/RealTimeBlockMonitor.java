@@ -1,7 +1,7 @@
 package com.chaindigg.monitor;
 
-import com.chaindigg.monitor.common.utils.RpcUtils;
 import com.chaindigg.monitor.service.IEthRpcService;
+import com.chaindigg.monitor.utils.RpcUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;

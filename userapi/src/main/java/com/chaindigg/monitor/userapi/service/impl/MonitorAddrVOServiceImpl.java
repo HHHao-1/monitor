@@ -22,14 +22,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MonitorAddrVOServiceImpl extends ServiceImpl<MonitorAddrVOMapper, MonitorAddrVO>
     implements IMonitorAddrVOService {
-
+  
   private final MonitorAddrVOMapper monitorAddrVOMapper;
-
+  
   @Override
-  public List<MonitorAddrVO> selectByUserId(String id, int currentPage, int pageSize) {
+  public List<MonitorAddrVO> selectByUserId(String id, Integer currentPage, Integer pageSize) {
     IPage<MonitorAddrVO> page = new Page<MonitorAddrVO>(currentPage, pageSize);
     QueryWrapper<MonitorAddrVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("b.id", id).orderByDesc("a.id");
+    queryWrapper.eq("b.user_id", id).orderByDesc("a.id");
+    List<MonitorAddrVO> ll = monitorAddrVOMapper.selectByUserId(page, queryWrapper).getRecords();
     return monitorAddrVOMapper.selectByUserId(page, queryWrapper).getRecords();
   }
 }

@@ -12,13 +12,13 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface ICoinKindService extends IService<CoinKind> {
-
-  List<CoinKind> selectAll(String mainChain, String coinName, int currentPage, int pageSize);
-
+  
+  List<CoinKind> selectAll(String mainChain, String coinName, Integer currentPage, Integer pageSize);
+  
   Boolean add(String mainChain, String coinName, String contract, Integer point);
-
+  
   Boolean delete(String mainChain, String coinName, String contract, Integer point);
-
+  
   Boolean update(
       String mainChain,
       String coinName,

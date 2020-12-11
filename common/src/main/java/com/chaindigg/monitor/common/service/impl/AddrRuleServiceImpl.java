@@ -25,20 +25,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
     implements IAddrRuleService {
-
+  
   private final UserMapper userMapper;
   private final AddrRuleMapper addrRuleMapper;
-
+  
   @Override
   public Integer searchUserId(String name) {
     QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
     userQueryWrapper.select("id").eq("name", name);
     return userMapper.selectOne(userQueryWrapper).getId();
   }
-
+  
   private List<AddrRule> addrRuleList(List<Map<String, Object>> list, Integer id) {
     List<AddrRule> listSave = new ArrayList<>();
-
+    
     list.stream()
         .forEach(
             e -> {
@@ -58,15 +58,15 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
             });
     return listSave;
   }
-
+  
   @Override
-  public List<AddrRule> selectAllById(Integer id, int currentPage, int pageSize) {
+  public List<AddrRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize) {
     IPage<AddrRule> page = new Page<AddrRule>(currentPage, pageSize);
     QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("id", id).eq("state", 1);
+    queryWrapper.eq("user_id", userId).eq("state", 1);
     return this.page(page, queryWrapper).getRecords();
   }
-
+  
   @Override
   public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());
@@ -77,13 +77,13 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
       throw new DataBaseException(State.USER_NOT_EXIST);
     }
   }
-
+  
   public Integer addrRuleState(Integer id) {
     QueryWrapper<AddrRule> queryWrapper = new QueryWrapper<>();
     queryWrapper.select("state").eq("id", id);
     return addrRuleMapper.selectOne(queryWrapper).getState();
   }
-
+  
   @Override
   public Boolean delete(Integer id) {
     Integer state = addrRuleState(id);
@@ -96,7 +96,7 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
     }
     return this.update(queryWrapper);
   }
-
+  
   @Override
   public Boolean update(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());

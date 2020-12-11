@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface IAddrRuleService extends IService<AddrRule> {
-
+  
   Integer searchUserId(String name);
-
-  List<AddrRule> selectAllById(Integer id, int currentPage, int pageSize);
-
+  
+  List<AddrRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize);
+  
   Boolean add(List<Map<String, Object>> list) throws DataBaseException;
-
+  
   Boolean delete(Integer id);
-
+  
   Boolean update(List<Map<String, Object>> list) throws DataBaseException;
 }

@@ -18,11 +18,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
-
+  
   private final UserMapper userMapper;
-
+  
   @Override
-  public List<User> selectAll(String name, int currentPage, int pageSize) {
+  public List<User> selectAll(String name, Integer currentPage, Integer pageSize) {
     IPage<User> page = new Page<User>(currentPage, pageSize);
     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
@@ -31,7 +31,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
     return this.page(page, queryWrapper).getRecords();
   }
-
+  
   @Override
   public Boolean add(String name, String phone, String email, String remark) {
     User user = new User();
@@ -44,13 +44,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         .setState(1);
     return this.save(user);
   }
-
+  
   public Integer userState(Integer id) {
     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
     queryWrapper.select("state").eq("id", id);
     return userMapper.selectOne(queryWrapper).getState();
   }
-
+  
   @Override
   public Boolean delete(Integer id) {
     Integer state = userState(id);
@@ -65,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
     return this.update(queryWrapper);
   }
-
+  
   @Override
   public Boolean update(Integer id, String name, String phone, String email, String remark) {
     UpdateWrapper<User> queryWrapper = new UpdateWrapper<>();

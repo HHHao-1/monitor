@@ -12,6 +12,6 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface IMonitorAddrVOService extends IService<MonitorAddrVO> {
-  List<MonitorAddrVO> selectByUserId(String id, int currentPage, int pageSize);
-
+  List<MonitorAddrVO> selectByUserId(String id, Integer currentPage, Integer pageSize);
+  
 }

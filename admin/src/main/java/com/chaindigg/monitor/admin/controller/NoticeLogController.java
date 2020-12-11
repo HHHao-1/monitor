@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class NoticeLogController {
   private final INoticeLogService noticeLogService;
-
+  
   @GetMapping("/notice-logs/addr")
   public ApiResponse getAddrNoticeLogs(
-      String eventName, String coinKind, int currentPage, int pageSize) {
+      String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
@@ -30,9 +30,9 @@ public class NoticeLogController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @GetMapping("/notice-logs/trans")
-  public ApiResponse getTransNoticeLogs(String coinKind, int currentPage, int pageSize) {
+  public ApiResponse getTransNoticeLogs(String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, noticeLogService.selectTransAll(coinKind, currentPage, pageSize));
@@ -41,10 +41,10 @@ public class NoticeLogController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @GetMapping("/notice-logs")
   public ApiResponse getLogs(
-      String monitorType, String eventName, String coinKind, int currentPage, int pageSize) {
+      String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,

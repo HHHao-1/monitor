@@ -20,9 +20,9 @@ import java.util.Map;
 @RestController
 public class TransRuleController {
   private final ITransRuleService transRuleService;
-
+  
   @GetMapping("/trans-rules")
-  public ApiResponse getAllRulesByUserId(Integer id, int currentPage, int pageSize) {
+  public ApiResponse getAllRulesByUserId(Integer id, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, transRuleService.selectAllById(id, currentPage, pageSize));
@@ -30,7 +30,7 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/trans-rules")
   public ApiResponse addAllTransRules(List<Map<String, Object>> list) {
     try {
@@ -43,7 +43,7 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/trans-rules")
   public ApiResponse deleteAllRules(Integer id) {
     try {
@@ -53,7 +53,7 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/trans-rules")
   public ApiResponse updateAllRules(List<Map<String, Object>> list) {
     try {

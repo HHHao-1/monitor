@@ -25,16 +25,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule>
     implements ITransRuleService {
-
+  
   private final UserMapper userMapper;
   private final TransRuleMapper transRuleMapper;
-
+  
   public Integer searchUserId(String name) {
     QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
     userQueryWrapper.select("id");
     return userMapper.selectOne(userQueryWrapper).getId();
   }
-
+  
   private List<TransRule> transRuleList(List<Map<String, Object>> list) {
     List<TransRule> listSave = new ArrayList<>();
     list.stream()
@@ -53,15 +53,15 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
             });
     return listSave;
   }
-
+  
   @Override
-  public List<TransRule> selectAllById(Integer id, int currentPage, int pageSize) {
+  public List<TransRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize) {
     IPage<TransRule> page = new Page<TransRule>(currentPage, pageSize);
     QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("id", id).eq("state", 1);
+    queryWrapper.eq("user_id", userId).eq("state", 1);
     return this.page(page, queryWrapper).getRecords();
   }
-
+  
   @Override
   public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());
@@ -72,13 +72,13 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
       throw new DataBaseException(State.USER_NOT_EXIST);
     }
   }
-
+  
   public Integer transRuleState(Integer id) {
     QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
     queryWrapper.select("state").eq("id", id);
     return transRuleMapper.selectOne(queryWrapper).getState();
   }
-
+  
   @Override
   public Boolean delete(Integer id) {
     Integer state = transRuleState(id);
@@ -91,7 +91,7 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
     }
     return this.update(queryWrapper);
   }
-
+  
   @Override
   public Boolean update(List<Map<String, Object>> list) throws DataBaseException {
     Integer id = searchUserId(list.get(0).get("userName").toString());

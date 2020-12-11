@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MonitorAddrController {
   private final IMonitorAddrVOService monitorAddrVOService;
   private final IMonitorAddrService monitorAddrService;
-
+  
   @GetMapping("/monitor-addr")
-  public ApiResponse getMonitorAddrListByUserId(String id, int currentPage, int pageSize) {
+  public ApiResponse getMonitorAddrListByUserId(String id, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, monitorAddrVOService.selectByUserId(id, currentPage, pageSize));
@@ -25,7 +25,7 @@ public class MonitorAddrController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/monitor-addr")
   public ApiResponse getMonitorAddrList(MonitorAddr monitorAddr) {
     try {

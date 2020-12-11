@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
 @Service
 public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeLogVO>
     implements INoticeLogService {
-
+  
   @Override
   public List<NoticeLogVO> selectAddrAll(
-      String eventName, String coinKind, int currentPage, int pageSize) {
+      String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     // 自定义查询最好加上别名.字段，否则字段查询可能会找不到（模糊不清）
@@ -41,9 +41,9 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     }
     return this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
   }
-
+  
   @Override
-  public List<NoticeLogVO> selectTransAll(String coinKind, int currentPage, int pageSize) {
+  public List<NoticeLogVO> selectTransAll(String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("b.id");
@@ -52,10 +52,10 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     }
     return this.baseMapper.selectTransAll(queryWrapper, page).getRecords();
   }
-
+  
   @Override
   public List<NoticeLogVO> selectAll(
-      String monitorType, String eventName, String coinKind, int currentPage, int pageSize) {
+      String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("b.id");
@@ -81,7 +81,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
           break;
       }
     }
-
+    
     // 这里要查全部，pageSize取long的最大值
     page = new Page<NoticeLogVO>(0L, 9223372036854775807L);
     List<NoticeLogVO> list = this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();

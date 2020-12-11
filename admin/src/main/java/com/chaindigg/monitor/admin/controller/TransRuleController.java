@@ -22,10 +22,10 @@ import java.util.Map;
 public class TransRuleController {
   private final ITransRuleVOService transRuleVOService;
   private final ITransRuleService transRuleService;
-
+  
   @GetMapping("/trans-rules")
   public ApiResponse getTransRules(
-      String coin, String userName, String userId, int currentPage, int pageSize) {
+      String coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
@@ -35,9 +35,9 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/trans-rules")
-  public ApiResponse addAllTransRules(List<Map<String, Object>> list) {
+  public ApiResponse addAllTransRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.add(list));
     } catch (DataBaseException e) {
@@ -48,7 +48,7 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/trans-rules")
   public ApiResponse deleteAllRules(Integer id) {
     try {
@@ -58,7 +58,7 @@ public class TransRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/trans-rules")
   public ApiResponse updateAllRules(List<Map<String, Object>> list) {
     try {

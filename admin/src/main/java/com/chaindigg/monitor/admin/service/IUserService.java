@@ -12,12 +12,12 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface IUserService extends IService<User> {
-
-  List<User> selectAll(String name, int currentPage, int pageSize);
-
+  
+  List<User> selectAll(String name, Integer currentPage, Integer pageSize);
+  
   Boolean add(String name, String phone, String email, String remark);
-
+  
   Boolean delete(Integer id);
-
+  
   Boolean update(Integer id, String name, String phone, String email, String remark);
 }

@@ -22,7 +22,7 @@ import java.util.Map;
 public class AddrRuleController {
   private final IAddrRuleVOService addrRuleVOService;
   private final IAddrRuleService addrRuleService;
-
+  
   @GetMapping("/addr-rules/search")
   public ApiResponse selectExist(String name) {
     try {
@@ -32,10 +32,10 @@ public class AddrRuleController {
       return ApiResponse.create(State.USER_NOT_EXIST);
     }
   }
-
+  
   @GetMapping("/addr-rules")
   public ApiResponse getAllRules(
-      String event, String userName, String userId, int currentPage, int pageSize) {
+      String event, String userName, String userId, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
@@ -45,7 +45,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/addr-rules")
   public ApiResponse addAllAddrRules(@RequestBody List<Map<String, Object>> list) {
     try {
@@ -58,7 +58,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/addr-rules")
   public ApiResponse deleteAllRules(Integer id) {
     try {
@@ -68,7 +68,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/addr-rules")
   public ApiResponse updateAllRules(List<Map<String, Object>> list) {
     try {

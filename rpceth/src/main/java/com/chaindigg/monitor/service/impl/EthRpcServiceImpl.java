@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chaindigg.monitor.common.dao.*;
 import com.chaindigg.monitor.common.entity.*;
 import com.chaindigg.monitor.common.utils.DataBaseUtils;
-import com.chaindigg.monitor.common.utils.NoticeUtils;
-import com.chaindigg.monitor.common.utils.RpcUtils;
 import com.chaindigg.monitor.common.utils.StringUtils;
 import com.chaindigg.monitor.service.IEthRpcService;
+import com.chaindigg.monitor.utils.NoticeUtils;
+import com.chaindigg.monitor.utils.RpcUtils;
 import com.google.common.base.Joiner;
 import com.zhifantech.bo.RawEthBlock;
 import com.zhifantech.util.ParityPoolUtil;
@@ -91,6 +91,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
         try {
           rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
         } catch (Exception e) {
+          log.info("----------------------");
           e.printStackTrace();
           log.info("获取区块信息异常");
         }

@@ -23,10 +23,10 @@ import java.util.List;
 @Service
 public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     implements ICoinKindService {
-
+  
   @Override
   public List<CoinKind> selectAll(
-      String mainChain, String coinName, int currentPage, int pageSize) {
+      String mainChain, String coinName, Integer currentPage, Integer pageSize) {
     IPage<CoinKind> page = new Page<CoinKind>(currentPage, pageSize);
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
@@ -38,7 +38,7 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     }
     return this.page(page, queryWrapper).getRecords();
   }
-
+  
   @Override
   public Boolean add(String mainChain, String coinName, String contract, Integer point) {
     CoinKind coinKind = new CoinKind();
@@ -51,7 +51,7 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
         .setUpdateTime(LocalDateTime.now());
     return this.save(coinKind);
   }
-
+  
   @Override
   public Boolean delete(String mainChain, String coinName, String contract, Integer point) {
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
@@ -64,7 +64,7 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     }
     return this.remove(queryWrapper);
   }
-
+  
   @Override
   public Boolean update(
       String mainChain,

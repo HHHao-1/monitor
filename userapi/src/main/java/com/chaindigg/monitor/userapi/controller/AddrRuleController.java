@@ -20,9 +20,9 @@ import java.util.Map;
 @RestController
 public class AddrRuleController {
   private final IAddrRuleService addrRuleService;
-
+  
   @GetMapping("/addr-rules")
-  public ApiResponse getAllRulesByUserId(Integer id, int currentPage, int pageSize) {
+  public ApiResponse getAllRulesByUserId(Integer id, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, addrRuleService.selectAllById(id, currentPage, pageSize));
@@ -30,7 +30,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/addr-rules")
   public ApiResponse addAllAddrRules(List<Map<String, Object>> list) {
     try {
@@ -43,7 +43,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/addr-rules")
   public ApiResponse deleteAllRules(Integer id) {
     try {
@@ -53,7 +53,7 @@ public class AddrRuleController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/addr-rules")
   public ApiResponse updateAllRules(List<Map<String, Object>> list) {
     try {

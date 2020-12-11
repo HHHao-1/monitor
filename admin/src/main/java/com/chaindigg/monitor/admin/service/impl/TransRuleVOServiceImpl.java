@@ -23,9 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, TransRuleVO>
     implements ITransRuleVOService {
-
+  
   public List<TransRuleVO> selectAll(
-      String coin, String userName, String userId, int currentPage, int pageSize) {
+      String coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("a.id");

@@ -12,5 +12,5 @@ import java.util.List;
  * @since 2020-11-17
  */
 public interface IMonitorTransVOService extends IService<MonitorTransVO> {
-  List<MonitorTransVO> selectByUserId(String id, int currentPage, int pageSize);
+  List<MonitorTransVO> selectByUserId(String id, Integer currentPage, Integer pageSize);
 }

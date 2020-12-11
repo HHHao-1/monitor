@@ -19,9 +19,9 @@ import java.util.List;
 @RestController
 public class CoinKindController {
   private final ICoinKindService coinKindService;
-
+  
   private final ISearchCoinKindService searchCoinKindService;
-
+  
   @GetMapping("/coinlist")
   public ApiResponse getCoinList() {
     try {
@@ -31,10 +31,10 @@ public class CoinKindController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @GetMapping("/coin-kinds")
   public ApiResponse getCoinKinds(
-      String mainChain, String coinName, int currentPage, int pageSize) {
+      String mainChain, String coinName, Integer currentPage, Integer pageSize) {
     List list = coinKindService.selectAll(mainChain, coinName, currentPage, pageSize);
     System.out.println(list);
     try {
@@ -45,7 +45,7 @@ public class CoinKindController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PostMapping("/coin-kinds")
   public ApiResponse addCoinKind(
       String mainChain, String coinName, String contract, Integer point) {
@@ -57,7 +57,7 @@ public class CoinKindController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @DeleteMapping("/coin-kinds")
   public ApiResponse deleteCoinKind(
       String mainChain, String coinName, String contract, Integer point) {
@@ -69,7 +69,7 @@ public class CoinKindController {
       return ApiResponse.create(State.FAIL);
     }
   }
-
+  
   @PutMapping("/coin-kinds")
   public ApiResponse updateCoinKind(
       String mainChain,
