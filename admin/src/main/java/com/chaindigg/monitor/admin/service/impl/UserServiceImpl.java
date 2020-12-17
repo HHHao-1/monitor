@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +23,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   private final UserMapper userMapper;
   
   @Override
-  public List<User> selectAll(String name, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectAll(String name, Integer currentPage, Integer pageSize) {
     IPage<User> page = new Page<User>(currentPage, pageSize);
     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
     if (!StringUtils.isBlank(name)) {
       queryWrapper.eq("name", name);
     }
-    return this.page(page, queryWrapper).getRecords();
+    IPage<User> res = this.page(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
   
   @Override

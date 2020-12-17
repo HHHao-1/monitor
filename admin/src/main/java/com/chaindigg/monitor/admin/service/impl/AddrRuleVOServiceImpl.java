@@ -11,7 +11,8 @@ import com.chaindigg.monitor.admin.vo.AddrRuleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -24,7 +25,7 @@ import java.util.List;
 public class AddrRuleVOServiceImpl extends ServiceImpl<AddrRuleVOMapper, AddrRuleVO>
     implements IAddrRuleVOService {
   
-  public List<AddrRuleVO> selectAll(
+  public Map<String, Object> selectAll(
       String event, String userName, String userId, Integer currentPage, Integer pageSize) {
     IPage<AddrRuleVO> page = new Page<AddrRuleVO>(currentPage, pageSize);
     QueryWrapper<AddrRuleVO> queryWrapper = new QueryWrapper<>();
@@ -38,6 +39,10 @@ public class AddrRuleVOServiceImpl extends ServiceImpl<AddrRuleVOMapper, AddrRul
     if (!StringUtils.isBlank(event)) {
       queryWrapper.eq("a.event_name", event);
     }
-    return this.baseMapper.selectAll(queryWrapper, page).getRecords();
+    IPage<AddrRuleVO> res = this.baseMapper.selectAll(queryWrapper, page);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
 }

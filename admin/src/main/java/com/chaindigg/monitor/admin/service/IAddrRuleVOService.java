@@ -3,7 +3,7 @@ package com.chaindigg.monitor.admin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chaindigg.monitor.admin.vo.AddrRuleVO;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 服务类
@@ -13,6 +13,6 @@ import java.util.List;
  */
 public interface IAddrRuleVOService extends IService<AddrRuleVO> {
   
-  List<AddrRuleVO> selectAll(
+  Map<String, Object> selectAll(
       String event, String userName, String userId, Integer currentPage, Integer pageSize);
 }

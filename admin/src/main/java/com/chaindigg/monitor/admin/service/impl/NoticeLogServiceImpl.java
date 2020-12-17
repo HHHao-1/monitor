@@ -11,7 +11,9 @@ import com.chaindigg.monitor.admin.vo.NoticeLogVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     implements INoticeLogService {
   
   @Override
-  public List<NoticeLogVO> selectAddrAll(
+  public Map<String, Object> selectAddrAll(
       String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
@@ -39,23 +41,32 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("a.coin_kind", coinKind);
     }
-    return this.baseMapper.selectAddrAll(queryWrapper, page).getRecords();
+    IPage<NoticeLogVO> res = this.baseMapper.selectAddrAll(queryWrapper, page);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
   
   @Override
-  public List<NoticeLogVO> selectTransAll(String coinKind, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectTransAll(String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("b.id");
     if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("a.coin_kind", coinKind);
     }
-    return this.baseMapper.selectTransAll(queryWrapper, page).getRecords();
+    IPage<NoticeLogVO> res = this.baseMapper.selectTransAll(queryWrapper, page);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
   
   @Override
-  public List<NoticeLogVO> selectAll(
+  public Map<String, Object> selectAll(
       String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+    Map<String, Object> map = new HashMap<>();
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("b.id");
@@ -88,8 +99,9 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     list.addAll(this.baseMapper.selectTransAll(queryWrapper, page).getRecords());
     list =
         list.stream()
-            .sorted((p1, p2) -> p2.getNoticeTime().compareTo(p1.getNoticeTime()))
+            .sorted((p1, p2) -> p2.getUnusualTime().compareTo(p1.getUnusualTime()))
             .collect(Collectors.toList());
+    map.put("total", list.size());
     int start = 0;
     int end = 0;
     if ((currentPage * pageSize) > list.size()) {
@@ -105,20 +117,24 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
               .filter(e -> Objects.equals(e.getEventName(), eventName))
               .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
               .collect(Collectors.toList());
-      return listquery;
+      map.put("data", listquery);
+      return map;
     } else if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getEventName(), eventName))
               .collect(Collectors.toList());
-      return listquery;
+      map.put("data", listquery);
+      return map;
     } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
               .collect(Collectors.toList());
-      return listquery;
+      map.put("data", listquery);
+      return map;
     }
-    return list;
+    map.put("data", list);
+    return map;
   }
 }

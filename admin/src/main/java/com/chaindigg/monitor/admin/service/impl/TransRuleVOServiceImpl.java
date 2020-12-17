@@ -11,7 +11,8 @@ import com.chaindigg.monitor.admin.vo.TransRuleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -24,7 +25,7 @@ import java.util.List;
 public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, TransRuleVO>
     implements ITransRuleVOService {
   
-  public List<TransRuleVO> selectAll(
+  public Map<String, Object> selectAll(
       String coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
@@ -38,6 +39,10 @@ public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, Trans
     if (!StringUtils.isBlank(coin)) {
       queryWrapper.eq("a.coin_kind", coin);
     }
-    return this.baseMapper.selectAll(queryWrapper, page).getRecords();
+    IPage<TransRuleVO> res = this.baseMapper.selectAll(queryWrapper, page);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
 }

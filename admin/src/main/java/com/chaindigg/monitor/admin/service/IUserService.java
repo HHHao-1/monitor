@@ -3,7 +3,7 @@ package com.chaindigg.monitor.admin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chaindigg.monitor.common.entity.User;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 服务类
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface IUserService extends IService<User> {
   
-  List<User> selectAll(String name, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectAll(String name, Integer currentPage, Integer pageSize);
   
   Boolean add(String name, String phone, String email, String remark);
   

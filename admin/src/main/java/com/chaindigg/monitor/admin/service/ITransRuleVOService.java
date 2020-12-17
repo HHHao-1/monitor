@@ -3,7 +3,7 @@ package com.chaindigg.monitor.admin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chaindigg.monitor.admin.vo.TransRuleVO;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 服务类
@@ -13,6 +13,6 @@ import java.util.List;
  */
 public interface ITransRuleVOService extends IService<TransRuleVO> {
   
-  List<TransRuleVO> selectAll(
+  Map<String, Object> selectAll(
       String coin, String userName, String userId, Integer currentPage, Integer pageSize);
 }

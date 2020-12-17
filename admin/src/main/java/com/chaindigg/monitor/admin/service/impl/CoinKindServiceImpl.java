@@ -12,7 +12,8 @@ import com.chaindigg.monitor.common.entity.CoinKind;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -25,7 +26,7 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     implements ICoinKindService {
   
   @Override
-  public List<CoinKind> selectAll(
+  public Map<String, Object> selectAll(
       String mainChain, String coinName, Integer currentPage, Integer pageSize) {
     IPage<CoinKind> page = new Page<CoinKind>(currentPage, pageSize);
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
@@ -36,7 +37,11 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     if (!StringUtils.isBlank(coinName)) {
       queryWrapper.eq("coin_name", coinName);
     }
-    return this.page(page, queryWrapper).getRecords();
+    IPage<CoinKind> res = this.page(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
   
   @Override
