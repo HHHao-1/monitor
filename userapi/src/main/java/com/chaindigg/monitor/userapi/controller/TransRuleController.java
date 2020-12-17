@@ -31,8 +31,18 @@ public class TransRuleController {
     }
   }
   
+  @GetMapping("/trans-rules/id")
+  public ApiResponse getAllRulesById(Integer id) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, transRuleService.selectAllByUId(id));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   @PostMapping("/trans-rules")
-  public ApiResponse addAllTransRules(List<Map<String, Object>> list) {
+  public ApiResponse addAllTransRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.add(list));
     } catch (DataBaseException e) {
@@ -55,7 +65,7 @@ public class TransRuleController {
   }
   
   @PutMapping("/trans-rules")
-  public ApiResponse updateAllRules(List<Map<String, Object>> list) {
+  public ApiResponse updateAllRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.update(list));
     } catch (DataBaseException e) {

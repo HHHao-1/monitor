@@ -12,12 +12,12 @@ import com.chaindigg.monitor.common.entity.User;
 import com.chaindigg.monitor.common.enums.State;
 import com.chaindigg.monitor.common.exception.DataBaseException;
 import com.chaindigg.monitor.common.service.ITransRuleService;
-import com.chaindigg.monitor.common.utils.SearchNoticeWay;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,21 +31,21 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
   
   public Integer searchUserId(String name) {
     QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-    userQueryWrapper.select("id");
+    userQueryWrapper.select("id").eq("name", name);
     return userMapper.selectOne(userQueryWrapper).getId();
   }
   
-  private List<TransRule> transRuleList(List<Map<String, Object>> list) {
+  private List<TransRule> transRuleList(List<Map<String, Object>> list, Integer id) {
     List<TransRule> listSave = new ArrayList<>();
     list.stream()
         .forEach(
             e -> {
               TransRule transRule = new TransRule();
               transRule
-                  .setCoinKind(e.get("eventName").toString())
-                  .setNoticeWay(SearchNoticeWay.noticeWayId((String) e.get("noticeWay")))
-                  .setMonitorMinVal(e.get("monitorMinVal").toString())
-                  .setUserId(Integer.parseInt(e.get("id").toString()))
+                  .setCoinKind(String.valueOf(e.get("coinKind")))
+                  .setNoticeWay(Integer.parseInt(String.valueOf(e.get("noticeWay"))))
+                  .setMonitorMinVal(String.valueOf(e.get("monitorMinVal")))
+                  .setUserId(id)
                   .setState(1)
                   .setEventAddTime(LocalDateTime.now())
                   .setEventUpdateTime(LocalDateTime.now());
@@ -54,19 +54,59 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
     return listSave;
   }
   
+  private List<TransRule> updateRuleList(List<Map<String, Object>> list, Integer id) {
+    List<TransRule> listSave = new ArrayList<>();
+    list.stream()
+        .forEach(
+            e -> {
+              TransRule transRule = new TransRule();
+              transRule
+                  .setId(id)
+                  .setCoinKind(String.valueOf(e.get("coinKind")))
+                  .setNoticeWay(Integer.parseInt(String.valueOf(e.get("noticeWay"))))
+                  .setMonitorMinVal(String.valueOf(e.get("monitorMinVal")))
+                  .setState(1)
+                  .setEventUpdateTime(LocalDateTime.now());
+              if (list.get(0).get("userName") != null) {
+                Integer userId = searchUserId(String.valueOf(list.get(0).get("userName")));
+                transRule.setUserId(userId);
+              }
+              listSave.add(transRule);
+            });
+    return listSave;
+  }
+  
   @Override
-  public List<TransRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectAllById(Integer userId, Integer currentPage, Integer pageSize) {
     IPage<TransRule> page = new Page<TransRule>(currentPage, pageSize);
     QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
     queryWrapper.eq("user_id", userId).eq("state", 1);
-    return this.page(page, queryWrapper).getRecords();
+    IPage<TransRule> res = this.page(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public TransRule selectAllByUId(Integer Id) {
+    QueryWrapper<TransRule> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("id", Id).eq("state", 1);
+    return this.getOne(queryWrapper);
   }
   
   @Override
   public Boolean add(List<Map<String, Object>> list) throws DataBaseException {
-    Integer id = searchUserId(list.get(0).get("userName").toString());
+    Integer id;
+    if (list.get(0).get("userName") != null) {
+      id = searchUserId(list.get(0).get("userName").toString());
+    } else {
+      id = Integer.parseInt(list.get(0).get("id").toString());
+    }
+//    Integer id = searchUserId(list.get(0).get("userName").toString());
+//    Integer id = Integer.parseInt(list.get(0).get("id").toString());
     if (id != null) {
-      List<TransRule> listSave = transRuleList(list);
+      List<TransRule> listSave = transRuleList(list, id);
       return this.saveBatch(listSave);
     } else {
       throw new DataBaseException(State.USER_NOT_EXIST);
@@ -94,10 +134,11 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
   
   @Override
   public Boolean update(List<Map<String, Object>> list) throws DataBaseException {
-    Integer id = searchUserId(list.get(0).get("userName").toString());
+//    Integer id = searchUserId(list.get(0).get("userName").toString());
+    Integer id = Integer.parseInt(list.get(0).get("id").toString());
     if (id != null) {
-      List<TransRule> listSave = transRuleList(list);
-      return this.updateBatchById(listSave);
+      List<TransRule> listSave = updateRuleList(list, id);
+      return this.updateById(listSave.get(0));
     } else {
       throw new DataBaseException(State.USER_NOT_EXIST);
     }

@@ -26,6 +26,36 @@ public class MonitorAddrController {
     }
   }
   
+  @GetMapping("/monitor-addr/coin-kind")
+  public ApiResponse getMonitorAddrListByCoin(String id, Integer currentPage, Integer pageSize, String[] coinKinds) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, monitorAddrVOService.selectByCoinKind(id, currentPage, pageSize, coinKinds));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
+  @GetMapping("/monitor-addr/event")
+  public ApiResponse getMonitorAddrListByEvent(String id, Integer currentPage, Integer pageSize, String event) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, monitorAddrVOService.selectByEvent(id, currentPage, pageSize, event));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
+  @GetMapping("/monitor-addr/mark")
+  public ApiResponse getMonitorAddrListByMark(String id, Integer currentPage, Integer pageSize, String mark) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, monitorAddrVOService.selectByMark(id, currentPage, pageSize, mark));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   @PostMapping("/monitor-addr")
   public ApiResponse getMonitorAddrList(MonitorAddr monitorAddr) {
     try {

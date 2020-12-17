@@ -31,8 +31,18 @@ public class AddrRuleController {
     }
   }
   
+  @GetMapping("/addr-rules/id")
+  public ApiResponse getAllRulesById(Integer id) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, addrRuleService.selectAllByUId(id));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   @PostMapping("/addr-rules")
-  public ApiResponse addAllAddrRules(List<Map<String, Object>> list) {
+  public ApiResponse addAllAddrRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, addrRuleService.add(list));
     } catch (DataBaseException e) {
@@ -55,7 +65,7 @@ public class AddrRuleController {
   }
   
   @PutMapping("/addr-rules")
-  public ApiResponse updateAllRules(List<Map<String, Object>> list) {
+  public ApiResponse updateAllRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, addrRuleService.update(list));
     } catch (DataBaseException e) {

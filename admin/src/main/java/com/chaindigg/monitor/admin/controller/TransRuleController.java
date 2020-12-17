@@ -60,7 +60,7 @@ public class TransRuleController {
   }
   
   @PutMapping("/trans-rules")
-  public ApiResponse updateAllRules(List<Map<String, Object>> list) {
+  public ApiResponse updateAllRules(@RequestBody List<Map<String, Object>> list) {
     try {
       return ApiResponse.create(State.SUCCESS, transRuleService.update(list));
     } catch (DataBaseException e) {

@@ -11,7 +11,9 @@ public interface IAddrRuleService extends IService<AddrRule> {
   
   Integer searchUserId(String name);
   
-  List<AddrRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectAllById(Integer userId, Integer currentPage, Integer pageSize);
+  
+  AddrRule selectAllByUId(Integer id);
   
   Boolean add(List<Map<String, Object>> list) throws DataBaseException;
   

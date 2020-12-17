@@ -10,7 +10,8 @@ import com.chaindigg.monitor.userapi.vo.MonitorAddrVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -26,11 +27,53 @@ public class MonitorAddrVOServiceImpl extends ServiceImpl<MonitorAddrVOMapper, M
   private final MonitorAddrVOMapper monitorAddrVOMapper;
   
   @Override
-  public List<MonitorAddrVO> selectByUserId(String id, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectByUserId(String id, Integer currentPage, Integer pageSize) {
     IPage<MonitorAddrVO> page = new Page<MonitorAddrVO>(currentPage, pageSize);
     QueryWrapper<MonitorAddrVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("b.user_id", id).orderByDesc("a.id");
-    List<MonitorAddrVO> ll = monitorAddrVOMapper.selectByUserId(page, queryWrapper).getRecords();
-    return monitorAddrVOMapper.selectByUserId(page, queryWrapper).getRecords();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    IPage<MonitorAddrVO> res = monitorAddrVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public Map<String, Object> selectByCoinKind(String id, Integer currentPage, Integer pageSize, String[] coninKinds) {
+    IPage<MonitorAddrVO> page = new Page<MonitorAddrVO>(currentPage, pageSize);
+    QueryWrapper<MonitorAddrVO> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    queryWrapper.in("b.coin_kind", coninKinds);
+    IPage<MonitorAddrVO> res = monitorAddrVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public Map<String, Object> selectByEvent(String id, Integer currentPage, Integer pageSize, String eventName) {
+    IPage<MonitorAddrVO> page = new Page<MonitorAddrVO>(currentPage, pageSize);
+    QueryWrapper<MonitorAddrVO> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    queryWrapper.in("b.event_name", eventName);
+    IPage<MonitorAddrVO> res = monitorAddrVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public Map<String, Object> selectByMark(String id, Integer currentPage, Integer pageSize, String mark) {
+    IPage<MonitorAddrVO> page = new Page<MonitorAddrVO>(currentPage, pageSize);
+    QueryWrapper<MonitorAddrVO> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    queryWrapper.in("b.address_mark", mark);
+    IPage<MonitorAddrVO> res = monitorAddrVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
 }

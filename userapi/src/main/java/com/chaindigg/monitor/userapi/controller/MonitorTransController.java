@@ -26,6 +26,16 @@ public class MonitorTransController {
     }
   }
   
+  @GetMapping("/monitor-trans/coin-kind")
+  public ApiResponse getMonitorAddrListByCoin(String id, Integer currentPage, Integer pageSize, String[] coinKinds) {
+    try {
+      return ApiResponse.create(
+          State.SUCCESS, monitorTransVOService.selectByCoinKind(id, currentPage, pageSize, coinKinds));
+    } catch (Exception e) {
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   @PostMapping("/monitor-trans")
   public ApiResponse getMonitorTransList(MonitorTrans monitorTrans) {
     try {

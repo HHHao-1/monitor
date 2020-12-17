@@ -9,7 +9,9 @@ import java.util.Map;
 
 public interface ITransRuleService extends IService<TransRule> {
   
-  List<TransRule> selectAllById(Integer userId, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectAllById(Integer userId, Integer currentPage, Integer pageSize);
+  
+  TransRule selectAllByUId(Integer Id);
   
   Boolean add(List<Map<String, Object>> list) throws DataBaseException;
   

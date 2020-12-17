@@ -10,7 +10,8 @@ import com.chaindigg.monitor.userapi.vo.MonitorTransVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -26,10 +27,27 @@ public class MonitorTransVOServiceImpl extends ServiceImpl<MonitorTransVOMapper,
   private final MonitorTransVOMapper monitorTransVOMapper;
   
   @Override
-  public List<MonitorTransVO> selectByUserId(String id, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectByUserId(String id, Integer currentPage, Integer pageSize) {
     IPage<MonitorTransVO> page = new Page<MonitorTransVO>(currentPage, pageSize);
     QueryWrapper<MonitorTransVO> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("b.user_id", id).orderByDesc("a,id");
-    return monitorTransVOMapper.selectByUserId(page, queryWrapper).getRecords();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    IPage<MonitorTransVO> res = monitorTransVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public Map<String, Object> selectByCoinKind(String id, Integer currentPage, Integer pageSize, String[] coninKinds) {
+    IPage<MonitorTransVO> page = new Page<MonitorTransVO>(currentPage, pageSize);
+    QueryWrapper<MonitorTransVO> queryWrapper = new QueryWrapper<>();
+    queryWrapper.eq("b.user_id", id).eq("b.state", 1).orderByDesc("a.id");
+    queryWrapper.in("b.coin_kind", coninKinds);
+    IPage<MonitorTransVO> res = monitorTransVOMapper.selectByUserId(page, queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.getTotal());
+    map.put("data", res.getRecords());
+    return map;
   }
 }
