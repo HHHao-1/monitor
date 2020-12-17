@@ -53,6 +53,8 @@ public class EthRpcServiceImpl implements IEthRpcService {
   private UserMapper userMapper;
   @Resource
   private RpcUtils rpcUtils;
+  @Resource
+  private NoticeUtils noticeUtils;
   
   String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
   String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
@@ -175,8 +177,8 @@ public class EthRpcServiceImpl implements IEthRpcService {
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
-                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, transSmsTemplateCode, smsParams, formatMail);
+                noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
@@ -260,8 +262,8 @@ public class EthRpcServiceImpl implements IEthRpcService {
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
-                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, addrSmsTemplateCode, smsParams, formatMail);
+                noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, addrSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
@@ -327,8 +329,8 @@ public class EthRpcServiceImpl implements IEthRpcService {
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
-                NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, transSmsTemplateCode, smsParams, formatMail);
+                noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());

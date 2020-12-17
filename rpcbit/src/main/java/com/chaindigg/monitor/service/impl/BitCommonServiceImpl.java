@@ -52,6 +52,8 @@ public class BitCommonServiceImpl implements IBitCommonService {
   private MonitorTransMapper monitorTransMapper;
   @Resource
   private UserMapper userMapper;
+  @Resource
+  private NoticeUtils noticeUtils;
   
   String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
   String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
@@ -172,8 +174,9 @@ public class BitCommonServiceImpl implements IBitCommonService {
                       User noticeUser =
                           userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
                       try {
-                        NoticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                            monitorKind, transSmsTemplateCode, smsParams, finalFormatMail);
+                        noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                            monitorKind, transSmsTemplateCode, smsParams, finalFormatMail, coinKind,
+                            unusualCount, txElement.getTxid());
                       } catch (Exception e) {
                         e.printStackTrace();
                         log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getTxid());
@@ -343,8 +346,9 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         User noticeUser =
                             userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().get();
                         try {
-                          NoticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                              monitorKind, transSmsTemplateCode, smsParams, finalFormatMail);
+                          noticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                              monitorKind, transSmsTemplateCode, smsParams, finalFormatMail, coinKind,
+                              voutElement.getValue().toPlainString(), txElement.getTxid());
                         } catch (Exception e) {
                           e.printStackTrace();
                           log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getTxid());
@@ -453,8 +457,9 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         User noticeUser =
                             userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().get();
                         try {
-                          NoticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                              monitorKind, transSmsTemplateCode, smsParams, finalFormatMail);
+                          noticeUtils.notice(transRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
+                              monitorKind, transSmsTemplateCode, smsParams, finalFormatMail, coinKind,
+                              vinElement.getValue().toPlainString(), txElement.getTxid());
                         } catch (Exception e) {
                           e.printStackTrace();
                           log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getTxid());

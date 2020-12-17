@@ -1,4 +1,4 @@
-package com.chaindigg.monitor;
+package com.chaindigg.monitor.utils;
 
 
 import com.chaindigg.monitor.common.utils.ApiResponse;
