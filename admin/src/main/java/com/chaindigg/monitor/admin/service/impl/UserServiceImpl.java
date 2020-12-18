@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -34,6 +35,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     Map<String, Object> map = new HashMap<>();
     map.put("total", res.getTotal());
     map.put("data", res.getRecords());
+    return map;
+  }
+  
+  @Override
+  public Map<String, Object> selectList() {
+    QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+    queryWrapper.orderByDesc("id");
+    List<User> res = this.list(queryWrapper);
+    Map<String, Object> map = new HashMap<>();
+    map.put("total", res.size());
+    map.put("data", res);
     return map;
   }
   

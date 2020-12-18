@@ -21,6 +21,16 @@ public class UserController {
     }
   }
   
+  @GetMapping("/users/list")
+  public ApiResponse getUserList() {
+    try {
+      return ApiResponse.create(State.SUCCESS, userService.selectList());
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   @PostMapping("/users")
   public ApiResponse addUsers(String name, String phone, String email, String remark) {
     

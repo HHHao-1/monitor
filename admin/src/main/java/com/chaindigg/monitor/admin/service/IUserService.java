@@ -15,6 +15,8 @@ public interface IUserService extends IService<User> {
   
   Map<String, Object> selectAll(String name, Integer currentPage, Integer pageSize);
   
+  Map<String, Object> selectList();
+  
   Boolean add(String name, String phone, String email, String remark);
   
   Boolean delete(Integer id);
