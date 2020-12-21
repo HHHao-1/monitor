@@ -7,6 +7,7 @@ import com.chaindigg.monitor.common.utils.DataBaseUtils;
 import com.chaindigg.monitor.common.utils.StringUtils;
 import com.chaindigg.monitor.service.IEthRpcService;
 import com.chaindigg.monitor.utils.NoticeUtils;
+import com.chaindigg.monitor.utils.NumberUtils;
 import com.chaindigg.monitor.utils.RpcUtils;
 import com.google.common.base.Joiner;
 import com.zhifantech.bo.RawEthBlock;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -126,13 +128,22 @@ public class EthRpcServiceImpl implements IEthRpcService {
                            RawEthBlock blockWithTransaction, String coinKind) {
     log.info(coinKind + "区块大额交易监控beginning");
     blockWithTransaction.getTransactions().stream()
-        .filter(s -> transValueList.stream().map(BigDecimal::new).filter(x -> x.compareTo(new BigDecimal(s.getValueRaw())) < 0).count() > 0)
+        .filter(s -> transValueList.stream().map(BigDecimal::new)
+            .filter(x -> {
+              BigInteger ethValue = s.getValue();
+              if (ethValue.intValue() != 0) {
+                if (x.compareTo(NumberUtils.weiToEth(ethValue)) < 0) {
+                  return true;
+                }
+              }
+              return false;
+            }).count() > 0)
         .forEach(txElement -> {
           List<TransRule> matchRuleList = transRuleList.stream()
-              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
+              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(txElement.getValue())) < 0)
               .collect(Collectors.toList());
           List<Integer> transIdList = transRuleList.stream()
-              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(new BigDecimal(txElement.getValueRaw())) < 0)
+              .filter(y -> new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(txElement.getValue())) < 0)
               .map(TransRule::getId)
               .collect(Collectors.toList());
           List<Integer> userIdList = matchRuleList.stream()
@@ -152,7 +163,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
                 mailContent,
                 coinKind,
                 monitorKind,
-                txElement.getValueRaw(),
+                String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
                 txElement.getFrom(),
                 txElement.getTo(),
                 dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
@@ -161,7 +172,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
-            smsParams.add(txElement.getValueRaw());
+            smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
             smsParams.add(txElement.getTo());
             smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                 ZoneOffset.ofHours(8))));
@@ -178,7 +189,9 @@ public class EthRpcServiceImpl implements IEthRpcService {
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
                 noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind,
+                    String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
+                    txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
@@ -189,7 +202,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             try {
               monitorTrans
                   .setTransHash(txElement.getHash())
-                  .setUnusualCount(txElement.getValueRaw())
+                  .setUnusualCount(String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
                   .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                   .setTransRuleId(transId)
                   .setToAddress(txElement.getTo())
@@ -213,7 +226,21 @@ public class EthRpcServiceImpl implements IEthRpcService {
    */
   public void addrMonitor(List<AddrRule> addrRuleList, List<String> addrList, RawEthBlock blockWithTransaction, String coinKind) {
     log.info(coinKind + "区块地址监控beginning");
-    blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getFrom()))
+    blockWithTransaction.getTransactions().stream()
+        .filter(x -> {
+          for (AddrRule y : addrRuleList) {
+            if (Objects.equals(y.getAddress(), x.getTo())) {
+              if (y.getMonitorMinVal() == null) {
+                return true;
+              } else if (x.getValue().intValue() != 0) {
+                if (new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(x.getValue())) < 0) {
+                  return true;
+                }
+              }
+            }
+          }
+          return false;
+        })
         .forEach(txElement -> {
           List<AddrRule> matchRuleList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getFrom()))
@@ -238,7 +265,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
                 mailContent,
                 coinKind,
                 monitorKind,
-                "-" + txElement.getValueRaw(),
+                "-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
                 txElement.getFrom(),
                 dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                     ZoneOffset.ofHours(8))),
@@ -246,7 +273,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
-            smsParams.add("-" + txElement.getValueRaw());
+            smsParams.add("-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
             smsParams.add(txElement.getFrom());
             smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                 ZoneOffset.ofHours(8))));
@@ -263,7 +290,9 @@ public class EthRpcServiceImpl implements IEthRpcService {
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
                 noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, addrSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
+                    monitorKind, addrSmsTemplateCode, smsParams, formatMail, coinKind,
+                    String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
+                    txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
@@ -272,14 +301,26 @@ public class EthRpcServiceImpl implements IEthRpcService {
             });
             MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
-                .setUnusualCount("-" + txElement.getValueRaw())
+                .setUnusualCount("-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);
             DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null, coinKind);
           });
         });
-    blockWithTransaction.getTransactions().stream().filter(s -> addrList.contains(s.getTo()))
+    blockWithTransaction.getTransactions().stream()
+        .filter(x -> {
+          for (AddrRule y : addrRuleList) {
+            if (Objects.equals(y.getAddress(), x.getTo())) {
+              if (y.getMonitorMinVal() == null) {
+                return true;
+              } else if (new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(x.getValue())) < 0) {
+                return true;
+              }
+            }
+          }
+          return false;
+        })
         .forEach(txElement -> {
           List<AddrRule> matchRuleList = addrRuleList.stream()
               .filter(s -> s.getAddress().equals(txElement.getTo()))
@@ -305,7 +346,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
                 mailContent,
                 coinKind,
                 monitorKind,
-                "+" + txElement.getValueRaw(),
+                "+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
                 txElement.getFrom(),
                 dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                     ZoneOffset.ofHours(8))),
@@ -313,7 +354,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // 短信
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
-            smsParams.add("+" + txElement.getValueRaw());
+            smsParams.add("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
             smsParams.add(txElement.getTo());
             smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                 ZoneOffset.ofHours(8))));
@@ -330,7 +371,9 @@ public class EthRpcServiceImpl implements IEthRpcService {
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
               try {
                 noticeUtils.notice(addrRule.getNoticeWay(), noticeUser.getPhone(), noticeUser.getEmail(),
-                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind, txElement.getValueRaw(), txElement.getHash());
+                    monitorKind, transSmsTemplateCode, smsParams, formatMail, coinKind,
+                    String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
+                    txElement.getHash());
               } catch (Exception e) {
                 e.printStackTrace();
                 log.info(coinKind + monitorKind + "监控通知失败，交易哈希：" + txElement.getHash());
@@ -339,7 +382,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             });
             final MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
-                .setUnusualCount("+" + txElement.getValueRaw())
+                .setUnusualCount("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
                 .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);

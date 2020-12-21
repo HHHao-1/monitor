@@ -11,13 +11,5 @@
 
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
-    <!--    <dependencies>-->
-    <!--        <dependency>-->
-    <!--            <groupId>com.zhifantech</groupId>-->
-    <!--            <artifactId>eth-block-monitor</artifactId>-->
-    <!--            <version>1.1.1-SNAPSHOT</version>-->
-    <!--            <scope>compile</scope>-->
-    <!--        </dependency>-->
-    <!--    </dependencies>-->
 
 </project>
