@@ -203,7 +203,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
               monitorTrans
                   .setTransHash(txElement.getHash())
                   .setUnusualCount(String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
-                  .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
+                  .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(String.valueOf(blockWithTransaction.getTimestamp())), 0, ZoneOffset.ofHours(8)))
                   .setTransRuleId(transId)
                   .setToAddress(txElement.getTo())
                   .setFromAddress(txElement.getFrom());
@@ -302,7 +302,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
                 .setUnusualCount("-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
-                .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
+                .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(String.valueOf(blockWithTransaction.getTimestamp())), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);
             DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null, coinKind);
@@ -383,7 +383,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             final MonitorAddr monitorAddr = new MonitorAddr();
             monitorAddr.setTransHash(txElement.getHash())
                 .setUnusualCount("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())))
-                .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(blockWithTransaction.getTimestampRaw()), 0, ZoneOffset.ofHours(8)))
+                .setUnusualTime(LocalDateTime.ofEpochSecond(Long.valueOf(String.valueOf(blockWithTransaction.getTimestamp())), 0, ZoneOffset.ofHours(8)))
                 .setAddrRuleId(addrId);
             int rows = monitorAddrMapper.insert(monitorAddr);
             DataBaseUtils.insertInspect(rows, monitorAddr, txElement.getHash(), null, coinKind);
