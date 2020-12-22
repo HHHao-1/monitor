@@ -89,6 +89,11 @@ public class EthRpcServiceImpl implements IEthRpcService {
         log.info("获取区块高度异常");
       }
       if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+        if (maxBlockHeightOld != null) {
+          if (maxBlockHeight.compareTo(maxBlockHeightOld) > 0 && !Objects.equals(maxBlockHeight, maxBlockHeightOld + 1)) {
+            maxBlockHeight = maxBlockHeightOld + 1;
+          }
+        }
         log.info(coinKind + "区块监控beginning");
         maxBlockHeightOld = maxBlockHeight;
         RawEthBlock rawEthBlock = null;
