@@ -63,63 +63,64 @@ public class EthRpcServiceImpl implements IEthRpcService {
   
   DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   
-  public void ethMonitor() {
+  public void ethMonitor(Long blockHeight) {
     try {
-      monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH");
+      monitor(rpcUtils.createQueryConditions("ETH")[0], rpcUtils.createQueryConditions("ETH")[1], "ETH", blockHeight);
     } catch (Exception e) {
       e.printStackTrace();
       log.info("ETH区块监控异常ending");
     }
   }
   
-  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) {
+  public void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind, Long blockHeight) {
     // region 查询规则
     List<AddrRule> addrRuleList = addrRuleMapper.selectList(addrQueryWrapper);
     List<TransRule> transRuleList = transRuleMapper.selectList(transQueryWrapper);
     List<String> addrList = addrRuleList.stream().map(AddrRule::getAddress).collect(Collectors.toList());
     List<String> transValueList = transRuleList.stream().map(TransRule::getMonitorMinVal).collect(Collectors.toList());
     // endregion
-    Long maxBlockHeight = null;
-    Long maxBlockHeightOld = null;
-    while (true) {
-      try {
-        maxBlockHeight = ParityPoolUtil.getMaxBlockHeight();
-      } catch (Exception e) {
-        e.printStackTrace();
-        log.info("获取区块高度异常");
-      }
-      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
-        if (maxBlockHeightOld != null) {
-          if (maxBlockHeight.compareTo(maxBlockHeightOld) > 0 && !Objects.equals(maxBlockHeight, maxBlockHeightOld + 1)) {
-            maxBlockHeight = maxBlockHeightOld + 1;
-          }
-        }
-        log.info(coinKind + "区块监控beginning");
-        maxBlockHeightOld = maxBlockHeight;
-        RawEthBlock rawEthBlock = null;
-        try {
-          rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
-        } catch (Exception e) {
-          log.info("----------------------");
-          e.printStackTrace();
-          log.info("获取区块信息异常");
-        }
-        //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
-        //      log.info(rawEthBlock.toString());
-        List<String> runList = Arrays.asList("addr", "trans");
-        RawEthBlock finalRawEthBlock = rawEthBlock;
-        runList.stream().parallel().forEach(s -> {
-          switch (s) {
-            case "addr":
-              addrMonitor(addrRuleList, addrList, finalRawEthBlock, coinKind);
-              break;
-            case "trans":
-              transMonitor(transRuleList, transValueList, finalRawEthBlock, coinKind);
-              break;
-          }
-        });
-      }
+//    Long maxBlockHeight = null;
+//    Long maxBlockHeightOld = null;
+//    while (true) {
+//      try {
+//        maxBlockHeight = ParityPoolUtil.getMaxBlockHeight();
+//      } catch (Exception e) {
+//        e.printStackTrace();
+//        log.info("获取区块高度异常");
+//      }
+//      if (!Objects.equals(maxBlockHeight, maxBlockHeightOld)) {
+//        if (maxBlockHeightOld != null) {
+//          if (maxBlockHeight.compareTo(maxBlockHeightOld) > 0 && !Objects.equals(maxBlockHeight, maxBlockHeightOld + 1)) {
+//            maxBlockHeight = maxBlockHeightOld + 1;
+//          }
+//        }
+    log.info(coinKind + "区块监控beginning");
+    log.info(coinKind + "区块监控beginning，" + "区块高度：" + blockHeight);
+//        maxBlockHeightOld = maxBlockHeight;
+    RawEthBlock rawEthBlock = null;
+    try {
+//          rawEthBlock = ParityPoolUtil.getBlockWithTransaction(maxBlockHeight);
+      rawEthBlock = ParityPoolUtil.getBlockWithTransaction(blockHeight);
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.info("获取区块信息异常");
     }
+    //      RawEthBlock rawEthBlock = ParityPoolUtil.getBlockWithTransaction(11384081L);
+    //      log.info(rawEthBlock.toString());
+    List<String> runList = Arrays.asList("addr", "trans");
+    RawEthBlock finalRawEthBlock = rawEthBlock;
+    runList.stream().parallel().forEach(s -> {
+      switch (s) {
+        case "addr":
+          addrMonitor(addrRuleList, addrList, finalRawEthBlock, coinKind);
+          break;
+        case "trans":
+          transMonitor(transRuleList, transValueList, finalRawEthBlock, coinKind);
+          break;
+      }
+    });
+//      }
+//    }
   }
   
   /**

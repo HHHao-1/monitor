@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface IEthRpcService {
   
-  void ethMonitor();
+  void ethMonitor(Long blockHeight);
   
-  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind);
+  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind, Long blockHeight);
   
   void transMonitor(List<TransRule> transRuleList, List<String> transValueList, RawEthBlock blockWithTransaction, String coinKind);
   

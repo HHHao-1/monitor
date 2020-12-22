@@ -8,7 +8,7 @@ import com.sulacosoft.bitcoindconnector4j.response.BlockWithTransaction;
 import java.util.List;
 
 public interface IBitCommonService {
-  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind) throws Exception;
+  void monitor(QueryWrapper addrQueryWrapper, QueryWrapper transQueryWrapper, String coinKind, Long blockHeight) throws Exception;
   
   void transMonitor(List<TransRule> transRuleList, List<String> transValueList, BlockWithTransaction blockWithTransaction, String coinKind);
   

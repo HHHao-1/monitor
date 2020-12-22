@@ -35,7 +35,7 @@ public class RealTimeBlockMonitor implements ApplicationRunner {
     
     // 连接节点
     rpcUtils.bitInit(bitUrlList);
-    bitRpcInitService.bitMonitor(rpcCoinKind);
+//    bitRpcInitService.bitMonitor(rpcCoinKind);
     
   }
 }

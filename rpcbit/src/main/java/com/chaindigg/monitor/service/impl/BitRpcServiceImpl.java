@@ -17,10 +17,10 @@ public class BitRpcServiceImpl implements IBitRpcService {
   @Resource
   private RpcUtils rpcUtils;
   
-  public void bitMonitor(String coinKind) {
+  public void bitMonitor(String coinKind, Long blockHeight) {
     try {
       commonService.monitor(rpcUtils.createQueryConditions(coinKind)[0], rpcUtils.createQueryConditions(coinKind)[1],
-          coinKind);
+          coinKind, blockHeight);
     } catch (Exception e) {
       e.printStackTrace();
       log.info(coinKind + "区块监控异常，ending");

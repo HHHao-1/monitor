@@ -31,7 +31,7 @@ public class RealTimeBlockMonitor implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     
     rpcUtils.ethInit(ethUrlList);
-    ethRpcInitService.ethMonitor();
+//    ethRpcInitService.ethMonitor();
   }
 }
 
