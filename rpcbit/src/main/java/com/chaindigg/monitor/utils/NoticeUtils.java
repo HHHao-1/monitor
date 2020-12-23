@@ -30,7 +30,7 @@ public class NoticeUtils {
   public void notice(Integer noticeWay, String userPhone, String userMail, String monitorKind,
                      String smsTemplateCode,
                      ArrayList<String> smsParms, String formatMail, String coinKind, String unusualCount,
-                     String transHash) {
+                     String transHash) throws InterruptedException {
     MailService mailService = new MailServiceImpl();
     SmsService smsService = new SmsServiceImpl();
     mailService.init(null);
@@ -40,7 +40,7 @@ public class NoticeUtils {
         smsService.sendSms(null, userPhone, smsTemplateCode, smsParms);
         break;
       case 1:
-        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒", formatMail);
+        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒(" + coinKind + ")", formatMail);
         break;
       case 2:
         try {
@@ -52,7 +52,7 @@ public class NoticeUtils {
         break;
       case 3:
         smsService.sendSms(null, userPhone, smsTemplateCode, smsParms);
-        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒", formatMail);
+        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒(" + coinKind + ")", formatMail);
         break;
       case 4:
         smsService.sendSms(null, userPhone, smsTemplateCode, smsParms);
@@ -64,7 +64,7 @@ public class NoticeUtils {
         }
         break;
       case 5:
-        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒", formatMail);
+        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒(" + coinKind + ")", formatMail);
         try {
           String msg = "【" + coinKind + "】" + monitorKind + "监控提醒：" + "交易哈希[" + transHash + "],异动金额[" + unusualCount + "]";
           desktopNotifyProvider.sendMessage(msg, selectUserId(userPhone));
@@ -74,7 +74,8 @@ public class NoticeUtils {
         break;
       case 6:
         smsService.sendSms(null, userPhone, smsTemplateCode, smsParms);
-        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒", formatMail);
+        Thread.sleep(100);
+        mailService.sendHtmlMail(userMail, "Chaindigg" + monitorKind + "监控提醒(" + coinKind + ")", formatMail);
         try {
           String msg = "【" + coinKind + "】" + monitorKind + "监控提醒：" + "交易哈希[" + transHash + "],异动金额[" + unusualCount + "]";
           desktopNotifyProvider.sendMessage(msg, selectUserId(userPhone));
