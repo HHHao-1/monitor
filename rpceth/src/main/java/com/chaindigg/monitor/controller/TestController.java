@@ -22,7 +22,7 @@ public class TestController {
       return "成功";
     } catch (Exception e) {
       e.printStackTrace();
-      return "有异常";
+      return e.getMessage();
     }
   }
 }
