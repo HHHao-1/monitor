@@ -317,11 +317,13 @@ public class EthRpcServiceImpl implements IEthRpcService {
     blockWithTransaction.getTransactions().stream()
         .filter(x -> {
           for (AddrRule y : addrRuleList) {
-            if (Objects.equals(y.getAddress(), x.getTo())) {
+            if (Objects.equals(y.getAddress(), x.getFrom())) {
               if (y.getMonitorMinVal() == null) {
                 return true;
-              } else if (new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(x.getValue())) < 0) {
-                return true;
+              } else if (x.getValue().intValue() != 0) {
+                if (new BigDecimal(y.getMonitorMinVal()).compareTo(NumberUtils.weiToEth(x.getValue())) < 0) {
+                  return true;
+                }
               }
             }
           }
@@ -329,10 +331,10 @@ public class EthRpcServiceImpl implements IEthRpcService {
         })
         .forEach(txElement -> {
           List<AddrRule> matchRuleList = addrRuleList.stream()
-              .filter(s -> s.getAddress().equals(txElement.getTo()))
+              .filter(s -> s.getAddress().equals(txElement.getFrom()))
               .collect(Collectors.toList());
           List<Integer> addrIdList = addrRuleList.stream()
-              .filter(s -> s.getAddress().equals(txElement.getTo()))
+              .filter(s -> s.getAddress().equals(txElement.getFrom()))
               .map(AddrRule::getId)
               .collect(Collectors.toList());
           List<Integer> userIdList = matchRuleList.stream()
@@ -361,7 +363,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
             ArrayList<String> smsParams = new ArrayList<>();
             smsParams.add(coinKind);
             smsParams.add("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
-            smsParams.add(txElement.getTo());
+            smsParams.add(txElement.getFrom());
             smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                 ZoneOffset.ofHours(8))));
             // endregion
