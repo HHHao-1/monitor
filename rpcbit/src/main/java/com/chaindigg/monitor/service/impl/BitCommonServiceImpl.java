@@ -37,7 +37,7 @@ public class BitCommonServiceImpl implements IBitCommonService {
   private int dataBaseRetryNum;
   @Value("${addr-monitor-templateCode}")
   String addrSmsTemplateCode;
-  @Value("${trans-monitor-templateCode}")
+  @Value("${trans-utxo-monitor-templateCode}")
   String transSmsTemplateCode;
   
   @Resource
@@ -198,13 +198,13 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
                             ZoneOffset.ofHours(8))),
                         txElement.getTxid());
-                    // 短信
-                    ArrayList<String> smsParams = new ArrayList<>();
-                    smsParams.add(coinKind);
-                    smsParams.add(exist);
-                    smsParams.add(unusualCount);
-                    smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
-                        ZoneOffset.ofHours(8))));
+//                    // 短信
+//                    ArrayList<String> smsParams = new ArrayList<>();
+//                    smsParams.add(coinKind);
+//                    smsParams.add(exist);
+//                    smsParams.add(unusualCount);
+//                    smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+//                        ZoneOffset.ofHours(8))));
                     // endregion
                     String finalFormatMail = formatMail;
                     String finalExist = exist;
@@ -224,6 +224,14 @@ public class BitCommonServiceImpl implements IBitCommonService {
                     List<User> userList = userMapper.selectList(userQuery);
                     // endregion
                     matchRuleList.forEach(addrRule -> {
+                      // 短信
+                      ArrayList<String> smsParams = new ArrayList<>();
+                      smsParams.add(addrRule.getEventName());
+                      smsParams.add(exist);
+                      smsParams.add("（" + addrRule.getAddressMark() + "）");
+                      smsParams.add(unusualCount + coinKind);
+//                      smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+//                          ZoneOffset.ofHours(8))));
                       // region 通知
                       User noticeUser =
                           userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
@@ -290,12 +298,12 @@ public class BitCommonServiceImpl implements IBitCommonService {
                             ZoneOffset.ofHours(8)).toString(),
                         txElement.getTxid());
                     // 短信
-                    ArrayList<String> smsParams = new ArrayList<>();
-                    smsParams.add(coinKind);
-                    smsParams.add(exist);
-                    smsParams.add(unusualCount);
-                    smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
-                        ZoneOffset.ofHours(8)).toString());
+//                    ArrayList<String> smsParams = new ArrayList<>();
+//                    smsParams.add(coinKind);
+//                    smsParams.add(exist);
+//                    smsParams.add(unusualCount);
+//                    smsParams.add(LocalDateTime.ofEpochSecond(blockWithTransaction.getTime(), 0,
+//                        ZoneOffset.ofHours(8)).toString());
                     // endregion
                     String finalFormatMail = formatMail;
                     String finalExist = exist;
@@ -315,7 +323,14 @@ public class BitCommonServiceImpl implements IBitCommonService {
                     List<User> userList = userMapper.selectList(userQuery);
                     // endregion
                     String finalUnusualCount = unusualCount;
+                    String finalUnusualCount1 = unusualCount;
                     matchRuleList.forEach(addrRule -> {
+                      // 短信
+                      ArrayList<String> smsParams = new ArrayList<>();
+                      smsParams.add(addrRule.getEventName());
+                      smsParams.add(exist);
+                      smsParams.add("（" + addrRule.getAddressMark() + "）");
+                      smsParams.add(finalUnusualCount1 + coinKind);
                       // region 通知
                       User noticeUser =
                           userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
@@ -468,16 +483,22 @@ public class BitCommonServiceImpl implements IBitCommonService {
                         exist,
                         dtf.format(transTime),
                         Optional.ofNullable(txElement.getTxid()).orElse(null));
-                    // 短信
-                    ArrayList<String> smsParams = new ArrayList<>();
-                    smsParams.add(coinKind);
-                    smsParams.add(voutElement.getValue().toPlainString());
-                    smsParams.add(exist);
-                    smsParams.add(dtf.format(transTime));
+//                    // 短信
+//                    ArrayList<String> smsParams = new ArrayList<>();
+//                    smsParams.add(coinKind);
+//                    smsParams.add(voutElement.getValue().toPlainString());
+//                    smsParams.add(exist);
+//                    smsParams.add(dtf.format(transTime));
                     // endregion
                     String finalFromAddr = fromAddr.get();
                     String finalFormatMail = formatMail;
                     matchRuleList.forEach(transRule -> {
+                      // 短信
+                      ArrayList<String> smsParams = new ArrayList<>();
+                      smsParams.add(coinKind);
+                      smsParams.add(txElement.getTxid());
+                      smsParams.add(exist);
+                      smsParams.add(value + coinKind);
                       // region 通知
                       User noticeUser =
                           userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().orElse(null);
@@ -596,15 +617,20 @@ public class BitCommonServiceImpl implements IBitCommonService {
                           dtf.format(transTime),
                           Optional.ofNullable(txElement.getTxid()).orElse(null));
                       // 短信
-                      ArrayList<String> smsParams = new ArrayList<>();
-                      smsParams.add(coinKind);
-                      smsParams.add(vinElement.getValue().toPlainString());
-                      smsParams.add(exist);
-                      smsParams.add(dtf.format(transTime));
+//                      ArrayList<String> smsParams = new ArrayList<>();
+//                      smsParams.add(coinKind);
+//                      smsParams.add(vinElement.getValue().toPlainString());
+//                      smsParams.add(exist);
+//                      smsParams.add(dtf.format(transTime));
                       // endregion
                       String finalFormatMail = formatMail;
                       String finalToAddr = toAddr;
                       matchRuleList.forEach(transRule -> {
+                        ArrayList<String> smsParams = new ArrayList<>();
+                        smsParams.add(coinKind);
+                        smsParams.add(txElement.getTxid());
+                        smsParams.add(exist);
+                        smsParams.add(vinElement.getValue().toPlainString() + coinKind);
                         // region 通知
                         User noticeUser =
                             userList.stream().filter(user -> user.getId().equals(transRule.getUserId())).findFirst().get();

@@ -119,7 +119,7 @@ public class EthRpcServiceImpl implements IEthRpcService {
           addrMonitor(addrRuleList, addrList, finalRawEthBlock, coinKind);
           break;
         case "trans":
-          transMonitor(transRuleList, transValueList, finalRawEthBlock, coinKind);
+//          transMonitor(transRuleList, transValueList, finalRawEthBlock, coinKind);
           break;
       }
     });
@@ -180,12 +180,12 @@ public class EthRpcServiceImpl implements IEthRpcService {
                     ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
-            ArrayList<String> smsParams = new ArrayList<>();
-            smsParams.add(coinKind);
-            smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
-            smsParams.add(txElement.getTo());
-            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8))));
+//            ArrayList<String> smsParams = new ArrayList<>();
+//            smsParams.add(coinKind);
+//            smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
+//            smsParams.add(txElement.getTo());
+//            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+//                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();
@@ -194,6 +194,10 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // endregion
             
             matchRuleList.forEach(addrRule -> {
+              ArrayList<String> smsParams = new ArrayList<>();
+              smsParams.add(coinKind);
+              smsParams.add(txElement.getHash());
+              smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())) + coinKind);
               // region 通知
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
@@ -276,17 +280,17 @@ public class EthRpcServiceImpl implements IEthRpcService {
                 coinKind,
                 monitorKind,
                 "-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())),
-                txElement.getFrom(),
+                txElement.getTo(),
                 dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
                     ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
-            ArrayList<String> smsParams = new ArrayList<>();
-            smsParams.add(coinKind);
-            smsParams.add("-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
-            smsParams.add(txElement.getFrom());
-            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8))));
+//            ArrayList<String> smsParams = new ArrayList<>();
+//            smsParams.add(coinKind);
+//            smsParams.add("-" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
+//            smsParams.add(txElement.getFrom());
+//            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+//                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();
@@ -295,6 +299,11 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // endregion
             
             matchRuleList.forEach(addrRule -> {
+              ArrayList<String> smsParams = new ArrayList<>();
+              smsParams.add(addrRule.getEventName());
+              smsParams.add(txElement.getTo());
+              smsParams.add("（" + addrRule.getAddressMark() + "）");
+              smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())) + coinKind);
               // region 通知
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
@@ -364,12 +373,12 @@ public class EthRpcServiceImpl implements IEthRpcService {
                     ZoneOffset.ofHours(8))),
                 txElement.getHash());
             // 短信
-            ArrayList<String> smsParams = new ArrayList<>();
-            smsParams.add(coinKind);
-            smsParams.add("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
-            smsParams.add(txElement.getFrom());
-            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
-                ZoneOffset.ofHours(8))));
+//            ArrayList<String> smsParams = new ArrayList<>();
+//            smsParams.add(coinKind);
+//            smsParams.add("+" + String.valueOf(NumberUtils.weiToEth(txElement.getValue())));
+//            smsParams.add(txElement.getFrom());
+//            smsParams.add(dtf.format(LocalDateTime.ofEpochSecond(blockWithTransaction.getTimestamp().longValue(), 0,
+//                ZoneOffset.ofHours(8))));
             // endregion
             // region 中间List
             QueryWrapper<User> userQuery = new QueryWrapper<>();
@@ -378,6 +387,11 @@ public class EthRpcServiceImpl implements IEthRpcService {
             // endregion
             
             matchRuleList.forEach(addrRule -> {
+              ArrayList<String> smsParams = new ArrayList<>();
+              smsParams.add(addrRule.getEventName());
+              smsParams.add(txElement.getFrom());
+              smsParams.add("（" + addrRule.getAddressMark() + "）");
+              smsParams.add(String.valueOf(NumberUtils.weiToEth(txElement.getValue())) + coinKind);
               // region 通知
               User noticeUser =
                   userList.stream().filter(user -> user.getId().equals(addrRule.getUserId())).findFirst().get();
