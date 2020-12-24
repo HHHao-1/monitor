@@ -53,8 +53,12 @@ public class BitCommonServiceImpl implements IBitCommonService {
   @Resource
   private NoticeUtils noticeUtils;
   
-  String transMailHtmlPath = this.getClass().getClassLoader().getResource("bitMail.txt").getPath();
-  String addrMailHtmlPath = this.getClass().getClassLoader().getResource("bitMail.txt").getPath();
+  //  String transMailHtmlPath = this.getClass().getClassLoader().getResource("bitMail.txt").getPath();
+  @Value("${notice.path}")
+  private String transMailHtmlPath;
+  //  String addrMailHtmlPath = this.getClass().getClassLoader().getResource("bitMail.txt").getPath();
+  @Value("${notice.path}")
+  private String addrMailHtmlPath;
   
   DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   

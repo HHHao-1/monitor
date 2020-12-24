@@ -58,8 +58,12 @@ public class EthRpcServiceImpl implements IEthRpcService {
   @Resource
   private NoticeUtils noticeUtils;
   
-  String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
-  String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
+  //  String transMailHtmlPath = this.getClass().getClassLoader().getResource("transMailHtml.txt").getPath();
+  @Value("${notice.trans}")
+  private String transMailHtmlPath;
+  //  String addrMailHtmlPath = this.getClass().getClassLoader().getResource("addrMailHtml.txt").getPath();
+  @Value("${notice.addr}")
+  private String addrMailHtmlPath;
   
   DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   
