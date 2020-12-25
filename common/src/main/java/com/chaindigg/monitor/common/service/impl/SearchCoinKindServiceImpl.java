@@ -14,11 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchCoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     implements ISearchCoinKindService {
-
+  
   @Override
   public List<String> searchCoinKind() {
     List<String> list = new ArrayList<>();
-    this.list().stream().forEach(e -> list.add(e.getMainChain()));
+    this.list().stream().forEach(e -> list.add(e.getCoinName()));
     return list;
   }
 }
