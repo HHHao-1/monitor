@@ -61,7 +61,7 @@ public class TransRuleServiceImpl extends ServiceImpl<TransRuleMapper, TransRule
             e -> {
               TransRule transRule = new TransRule();
               transRule
-                  .setId(id)
+                  .setId(Integer.parseInt(String.valueOf(e.get("uid"))))
                   .setCoinKind(String.valueOf(e.get("coinKind")))
                   .setNoticeWay(Integer.parseInt(String.valueOf(e.get("noticeWay"))))
                   .setMonitorMinVal(String.valueOf(e.get("monitorMinVal")))

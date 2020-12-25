@@ -16,10 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,8 +45,8 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
                   .setCoinKind(String.valueOf(e.get("coinKind")))
                   .setAddress(String.valueOf(e.get("address")))
                   .setNoticeWay(Integer.parseInt(String.valueOf(e.get("noticeWay"))))
-                  .setMonitorMinVal(String.valueOf(e.get("monitorMinVal")))
-                  .setAddressMark(String.valueOf(e.get("addressMark")))
+                  .setMonitorMinVal(Optional.ofNullable(e.get("monitorMinVal")).map(s -> String.valueOf(s)).orElse(null))
+                  .setAddressMark(Optional.ofNullable(e.get("addressMark")).map(s -> String.valueOf(s)).orElse(null))
                   .setUserId(id)
                   .setState(1)
                   .setEventAddTime(LocalDateTime.now())
@@ -66,13 +63,13 @@ public class AddrRuleServiceImpl extends ServiceImpl<AddrRuleMapper, AddrRule>
             e -> {
               AddrRule addrRule = new AddrRule();
               addrRule
-                  .setId(id)
+                  .setId(Integer.parseInt(String.valueOf(e.get("uid"))))
                   .setEventName(String.valueOf(e.get("eventName")))
                   .setCoinKind(String.valueOf(e.get("coinKind")))
                   .setAddress(String.valueOf(e.get("address")))
                   .setNoticeWay(Integer.parseInt(String.valueOf(e.get("noticeWay"))))
-                  .setMonitorMinVal(String.valueOf(e.get("monitorMinVal")))
-                  .setAddressMark(String.valueOf(e.get("addressMark")))
+                  .setMonitorMinVal(Optional.ofNullable(e.get("monitorMinVal")).map(s -> String.valueOf(s)).orElse(null))
+                  .setAddressMark(Optional.ofNullable(e.get("addressMark")).map(s -> String.valueOf(s)).orElse(null))
                   .setState(1)
                   .setEventUpdateTime(LocalDateTime.now());
               if (list.get(0).get("userName") != null) {
