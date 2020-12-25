@@ -29,10 +29,13 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     implements INoticeLogService {
   
   @Override
-  public Map<String, Object> selectAddrAll(String userName,
+  public Map<String, Object> selectAddrAll(Integer ruleId, String userName,
                                            String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
+    if (ruleId != null) {
+      queryWrapper.eq("b.addr_rule_id", ruleId);
+    }
     // 自定义查询最好加上别名.字段，否则字段查询可能会找不到（模糊不清）
     queryWrapper.orderByDesc("b.id");
     if ((!StringUtils.isBlank(eventName))) {
@@ -52,9 +55,13 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
   }
   
   @Override
-  public Map<String, Object> selectTransAll(String userName, String coinKind, Integer currentPage, Integer pageSize) {
+  public Map<String, Object> selectTransAll(Integer ruleId, String userName, String coinKind, Integer currentPage,
+                                            Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
+    if (ruleId != null) {
+      queryWrapper.eq("b.trans_rule_id", ruleId);
+    }
     queryWrapper.orderByDesc("b.id");
     if (!StringUtils.isBlank(coinKind)) {
       queryWrapper.eq("a.coin_kind", coinKind);
@@ -82,20 +89,20 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
           if (!StringUtils.isBlank(eventName)) {
             if (!StringUtils.isBlank(coinKind)) {
               if (!StringUtils.isBlank(userName)) {
-                return selectAddrAll(userName, eventName, coinKind, currentPage, pageSize);
+                return selectAddrAll(null, userName, eventName, coinKind, currentPage, pageSize);
               }
-              return selectAddrAll(null, eventName, coinKind, currentPage, pageSize);
+              return selectAddrAll(null, null, eventName, coinKind, currentPage, pageSize);
             }
-            return selectAddrAll(null, eventName, null, currentPage, pageSize);
+            return selectAddrAll(null, null, eventName, null, currentPage, pageSize);
           } else if (!StringUtils.isBlank(coinKind)) {
             if (!StringUtils.isBlank(userName)) {
-              return selectAddrAll(userName, null, coinKind, currentPage, pageSize);
+              return selectAddrAll(null, userName, null, coinKind, currentPage, pageSize);
             }
-            return selectAddrAll(null, eventName, coinKind, currentPage, pageSize);
+            return selectAddrAll(null, null, eventName, coinKind, currentPage, pageSize);
           } else if (!StringUtils.isBlank(userName)) {
-            return selectAddrAll(userName, null, null, currentPage, pageSize);
+            return selectAddrAll(null, userName, null, null, currentPage, pageSize);
           } else {
-            return selectAddrAll(null, null, null, currentPage, pageSize);
+            return selectAddrAll(null, null, null, null, currentPage, pageSize);
           }
 //          if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
 //            return selectAddrAll(eventName, null, currentPage, pageSize);
@@ -109,13 +116,13 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
         case "trans":
           if (!StringUtils.isBlank(coinKind)) {
             if (!StringUtils.isBlank(userName)) {
-              return selectTransAll(userName, coinKind, currentPage, pageSize);
+              return selectTransAll(null, userName, coinKind, currentPage, pageSize);
             }
-            return selectTransAll(null, coinKind, currentPage, pageSize);
+            return selectTransAll(null, null, coinKind, currentPage, pageSize);
           } else if (!StringUtils.isBlank(userName)) {
-            return selectTransAll(userName, null, currentPage, pageSize);
+            return selectTransAll(null, userName, null, currentPage, pageSize);
           } else {
-            return selectTransAll(null, null, currentPage, pageSize);
+            return selectTransAll(null, null, null, currentPage, pageSize);
           }
         default:
           break;
