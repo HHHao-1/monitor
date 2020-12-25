@@ -19,12 +19,12 @@ public class NoticeLogController {
   private final INoticeLogService noticeLogService;
   
   @GetMapping("/notice-logs/addr")
-  public ApiResponse getAddrNoticeLogs(
-      String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+  public ApiResponse getAddrNoticeLogs(String userName,
+                                       String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
-          noticeLogService.selectAddrAll(eventName, coinKind, currentPage, pageSize));
+          noticeLogService.selectAddrAll(userName, eventName, coinKind, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);
@@ -32,10 +32,10 @@ public class NoticeLogController {
   }
   
   @GetMapping("/notice-logs/trans")
-  public ApiResponse getTransNoticeLogs(String coinKind, Integer currentPage, Integer pageSize) {
+  public ApiResponse getTransNoticeLogs(String userName, String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
-          State.SUCCESS, noticeLogService.selectTransAll(coinKind, currentPage, pageSize));
+          State.SUCCESS, noticeLogService.selectTransAll(userName, coinKind, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);
@@ -43,12 +43,12 @@ public class NoticeLogController {
   }
   
   @GetMapping("/notice-logs")
-  public ApiResponse getLogs(
-      String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+  public ApiResponse getLogs(String userName,
+                             String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
-          noticeLogService.selectAll(monitorType, eventName, coinKind, currentPage, pageSize));
+          noticeLogService.selectAll(userName, monitorType, eventName, coinKind, currentPage, pageSize));
     } catch (Exception e) {
       e.printStackTrace();
       return ApiResponse.create(State.FAIL);

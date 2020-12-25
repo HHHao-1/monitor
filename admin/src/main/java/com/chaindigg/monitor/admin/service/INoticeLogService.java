@@ -13,10 +13,11 @@ import java.util.Map;
  */
 public interface INoticeLogService extends IService<NoticeLogVO> {
   
-  Map<String, Object> selectAddrAll(String eventName, String coinKind, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectAddrAll(String userName, String eventName, String coinKind, Integer currentPage,
+                                    Integer pageSize);
   
-  Map<String, Object> selectTransAll(String coinKind, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectTransAll(String userName, String coinKind, Integer currentPage, Integer pageSize);
   
-  Map<String, Object> selectAll(
-      String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize);
+  Map<String, Object> selectAll(String userName,
+                                String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize);
 }
