@@ -132,6 +132,9 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
         list.stream()
             .sorted((p1, p2) -> p2.getUnusualTime().compareTo(p1.getUnusualTime()))
             .collect(Collectors.toList());
+    if (userName != null) {
+      list = list.stream().filter(s -> Objects.equals(s.getUserName(), userName)).collect(Collectors.toList());
+    }
     map.put("total", list.size());
     int start = 0;
     int end = 0;
