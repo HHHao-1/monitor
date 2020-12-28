@@ -21,4 +21,11 @@ public class SearchCoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinK
     this.list().stream().forEach(e -> list.add(e.getCoinName()));
     return list;
   }
+  
+  @Override
+  public List<String> searchCoinMain() {
+    List<String> list = new ArrayList<>();
+    this.list().stream().forEach(e -> list.add(e.getMainChain()));
+    return list;
+  }
 }

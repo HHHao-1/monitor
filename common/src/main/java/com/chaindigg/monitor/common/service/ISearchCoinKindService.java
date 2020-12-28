@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ISearchCoinKindService extends IService<CoinKind> {
   List<String> searchCoinKind();
+  
+  List<String> searchCoinMain();
 }
