@@ -1,6 +1,0 @@
-<div>交易额：{} {}</div>
-<div>交易地址：{}</div>
-<div>交易时间：{}</div>
-<div>交易哈希值：{}</div>
-<p/>
-<div>更多数据服务，请关注https://www.Chaindigg.com</div>
