@@ -6,6 +6,7 @@ import com.chaindigg.monitor.common.exception.DataBaseException;
 import com.chaindigg.monitor.common.service.ITransRuleService;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class TransRuleController {
   
   @GetMapping("/trans-rules")
   public ApiResponse getTransRules(
-      List<String> coin, String userName, String userId, Integer currentPage, Integer pageSize) {
+      @Nullable @RequestParam List<String> coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,

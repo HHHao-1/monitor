@@ -5,6 +5,7 @@ import com.chaindigg.monitor.common.enums.State;
 import com.chaindigg.monitor.common.service.ISearchCoinKindService;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,9 @@ public class CoinKindController {
   
   @GetMapping("/coin-kinds")
   public ApiResponse getCoinKinds(
-      List<String> mainChain, List<String> coinName, Integer currentPage, Integer pageSize) {
+      @Nullable @RequestParam List<String> mainChain, @Nullable @RequestParam List<String> coinName,
+      Integer currentPage,
+      Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, coinKindService.selectAll(mainChain, coinName, currentPage, pageSize));

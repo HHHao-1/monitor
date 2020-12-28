@@ -32,10 +32,10 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
     IPage<CoinKind> page = new Page<CoinKind>(currentPage, pageSize);
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if (mainChain.size() != 0) {
+    if (mainChain != null) {
       queryWrapper.in("main_chain", mainChain);
     }
-    if (coinName.size() != 0) {
+    if (coinName != null) {
       queryWrapper.in("coin_name", coinName);
     }
     IPage<CoinKind> res = this.page(page, queryWrapper);

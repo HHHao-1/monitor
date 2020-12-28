@@ -4,7 +4,9 @@ import com.chaindigg.monitor.admin.service.INoticeLogService;
 import com.chaindigg.monitor.common.enums.State;
 import com.chaindigg.monitor.common.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,7 +24,8 @@ public class NoticeLogController {
   
   @GetMapping("/notice-logs/addr")
   public ApiResponse getAddrNoticeLogs(Integer ruleId, String userName,
-                                       String eventName, List<String> coinKind, Integer currentPage, Integer pageSize) {
+                                       String eventName, @Nullable @RequestParam List<String> coinKind, Integer currentPage,
+                                       Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
@@ -34,7 +37,8 @@ public class NoticeLogController {
   }
   
   @GetMapping("/notice-logs/trans")
-  public ApiResponse getTransNoticeLogs(Integer ruleId, String userName, List<String> coinKind, Integer currentPage,
+  public ApiResponse getTransNoticeLogs(Integer ruleId, String userName, @Nullable @RequestParam List<String> coinKind,
+                                        Integer currentPage,
                                         Integer pageSize) {
     try {
       return ApiResponse.create(
@@ -47,7 +51,8 @@ public class NoticeLogController {
   
   @GetMapping("/notice-logs")
   public ApiResponse getLogs(String userName,
-                             String monitorType, String eventName, List<String> coinKind, Integer currentPage,
+                             String monitorType, String eventName, @Nullable @RequestParam List<String> coinKind,
+                             Integer currentPage,
                              Integer pageSize) {
     try {
       return ApiResponse.create(

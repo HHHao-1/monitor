@@ -37,7 +37,7 @@ public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, Trans
     if (!StringUtils.isBlank(userName)) {
       queryWrapper.eq("b.name", userName);
     }
-    if (coin.size() != 0) {
+    if (coin != null) {
       queryWrapper.in("a.coin_kind", coin);
     }
     IPage<TransRuleVO> res = this.baseMapper.selectAll(queryWrapper, page);

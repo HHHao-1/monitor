@@ -41,7 +41,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     if ((!StringUtils.isBlank(eventName))) {
       queryWrapper.eq("a.event_name", eventName);
     }
-    if (coinKind.size() != 0) {
+    if (coinKind != null) {
       queryWrapper.in("a.coin_kind", coinKind);
     }
     if (!StringUtils.isBlank(userName)) {
@@ -63,7 +63,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       queryWrapper.eq("b.trans_rule_id", ruleId);
     }
     queryWrapper.orderByDesc("b.id");
-    if (coinKind.size() != 0) {
+    if (coinKind != null) {
       queryWrapper.in("a.coin_kind", coinKind);
     }
     if (!StringUtils.isBlank(userName)) {
@@ -88,14 +88,14 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       switch (monitorType) {
         case "addr":
           if (!StringUtils.isBlank(eventName)) {
-            if (coinKind.size() != 0) {
+            if (coinKind != null) {
               if (!StringUtils.isBlank(userName)) {
                 return selectAddrAll(null, userName, eventName, coinKind, currentPage, pageSize);
               }
               return selectAddrAll(null, null, eventName, coinKind, currentPage, pageSize);
             }
             return selectAddrAll(null, null, eventName, null, currentPage, pageSize);
-          } else if (coinKind.size() != 0) {
+          } else if (coinKind != null) {
             if (!StringUtils.isBlank(userName)) {
               return selectAddrAll(null, userName, null, coinKind, currentPage, pageSize);
             }
@@ -115,7 +115,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
 //            return selectAddrAll(null, null, currentPage, pageSize);
 //          }
         case "trans":
-          if (coinKind.size() != 0) {
+          if (coinKind != null) {
             if (!StringUtils.isBlank(userName)) {
               return selectTransAll(null, userName, coinKind, currentPage, pageSize);
             }
@@ -155,7 +155,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     }
     list = list.subList(start, end);
 //    if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
-    if (!StringUtils.isBlank(eventName) && coinKind.size() != 0) {
+    if (!StringUtils.isBlank(eventName) && coinKind != null) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getEventName(), eventName))
@@ -164,14 +164,14 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
               .collect(Collectors.toList());
       map.put("data", listquery);
       return map;
-    } else if (!StringUtils.isBlank(eventName) && coinKind.size() == 0) {
+    } else if (!StringUtils.isBlank(eventName) && coinKind == null) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getEventName(), eventName))
               .collect(Collectors.toList());
       map.put("data", listquery);
       return map;
-    } else if (StringUtils.isBlank(eventName) && coinKind.size() != 0) {
+    } else if (StringUtils.isBlank(eventName) && coinKind != null) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> coinKind.contains(e.getCoinKind()))
