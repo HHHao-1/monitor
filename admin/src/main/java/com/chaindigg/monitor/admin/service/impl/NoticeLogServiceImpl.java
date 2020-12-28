@@ -30,7 +30,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
   
   @Override
   public Map<String, Object> selectAddrAll(Integer ruleId, String userName,
-                                           String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+                                           String eventName, List<String> coinKind, Integer currentPage, Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
     if (ruleId != null) {
@@ -41,8 +41,8 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
     if ((!StringUtils.isBlank(eventName))) {
       queryWrapper.eq("a.event_name", eventName);
     }
-    if (!StringUtils.isBlank(coinKind)) {
-      queryWrapper.eq("a.coin_kind", coinKind);
+    if (coinKind.size() != 0) {
+      queryWrapper.in("a.coin_kind", coinKind);
     }
     if (!StringUtils.isBlank(userName)) {
       queryWrapper.eq("c.name", userName);
@@ -55,7 +55,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
   }
   
   @Override
-  public Map<String, Object> selectTransAll(Integer ruleId, String userName, String coinKind, Integer currentPage,
+  public Map<String, Object> selectTransAll(Integer ruleId, String userName, List<String> coinKind, Integer currentPage,
                                             Integer pageSize) {
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
@@ -63,8 +63,8 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       queryWrapper.eq("b.trans_rule_id", ruleId);
     }
     queryWrapper.orderByDesc("b.id");
-    if (!StringUtils.isBlank(coinKind)) {
-      queryWrapper.eq("a.coin_kind", coinKind);
+    if (coinKind.size() != 0) {
+      queryWrapper.in("a.coin_kind", coinKind);
     }
     if (!StringUtils.isBlank(userName)) {
       queryWrapper.eq("c.name", userName);
@@ -78,7 +78,8 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
   
   @Override
   public Map<String, Object> selectAll(String userName,
-                                       String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+                                       String monitorType, String eventName, List<String> coinKind, Integer currentPage,
+                                       Integer pageSize) {
     Map<String, Object> map = new HashMap<>();
     IPage<NoticeLogVO> page = new Page<NoticeLogVO>(currentPage, pageSize);
     QueryWrapper<NoticeLogVO> queryWrapper = new QueryWrapper<>();
@@ -87,14 +88,14 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       switch (monitorType) {
         case "addr":
           if (!StringUtils.isBlank(eventName)) {
-            if (!StringUtils.isBlank(coinKind)) {
+            if (coinKind.size() != 0) {
               if (!StringUtils.isBlank(userName)) {
                 return selectAddrAll(null, userName, eventName, coinKind, currentPage, pageSize);
               }
               return selectAddrAll(null, null, eventName, coinKind, currentPage, pageSize);
             }
             return selectAddrAll(null, null, eventName, null, currentPage, pageSize);
-          } else if (!StringUtils.isBlank(coinKind)) {
+          } else if (coinKind.size() != 0) {
             if (!StringUtils.isBlank(userName)) {
               return selectAddrAll(null, userName, null, coinKind, currentPage, pageSize);
             }
@@ -114,7 +115,7 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
 //            return selectAddrAll(null, null, currentPage, pageSize);
 //          }
         case "trans":
-          if (!StringUtils.isBlank(coinKind)) {
+          if (coinKind.size() != 0) {
             if (!StringUtils.isBlank(userName)) {
               return selectTransAll(null, userName, coinKind, currentPage, pageSize);
             }
@@ -153,25 +154,27 @@ public class NoticeLogServiceImpl extends ServiceImpl<NoticeLogVOMapper, NoticeL
       end = currentPage * pageSize;
     }
     list = list.subList(start, end);
-    if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+//    if (!StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+    if (!StringUtils.isBlank(eventName) && coinKind.size() != 0) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getEventName(), eventName))
-              .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
+//              .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
+              .filter(e -> coinKind.contains(e.getCoinKind()))
               .collect(Collectors.toList());
       map.put("data", listquery);
       return map;
-    } else if (!StringUtils.isBlank(eventName) && StringUtils.isBlank(coinKind)) {
+    } else if (!StringUtils.isBlank(eventName) && coinKind.size() == 0) {
       List<NoticeLogVO> listquery =
           list.stream()
               .filter(e -> Objects.equals(e.getEventName(), eventName))
               .collect(Collectors.toList());
       map.put("data", listquery);
       return map;
-    } else if (StringUtils.isBlank(eventName) && !StringUtils.isBlank(coinKind)) {
+    } else if (StringUtils.isBlank(eventName) && coinKind.size() != 0) {
       List<NoticeLogVO> listquery =
           list.stream()
-              .filter(e -> Objects.equals(e.getCoinKind(), coinKind))
+              .filter(e -> coinKind.contains(e.getCoinKind()))
               .collect(Collectors.toList());
       map.put("data", listquery);
       return map;

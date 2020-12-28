@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 服务控制器
  *
@@ -20,7 +22,7 @@ public class NoticeLogController {
   
   @GetMapping("/notice-logs/addr")
   public ApiResponse getAddrNoticeLogs(Integer ruleId, String userName,
-                                       String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+                                       String eventName, List<String> coinKind, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
@@ -32,7 +34,8 @@ public class NoticeLogController {
   }
   
   @GetMapping("/notice-logs/trans")
-  public ApiResponse getTransNoticeLogs(Integer ruleId, String userName, String coinKind, Integer currentPage, Integer pageSize) {
+  public ApiResponse getTransNoticeLogs(Integer ruleId, String userName, List<String> coinKind, Integer currentPage,
+                                        Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS, noticeLogService.selectTransAll(ruleId, userName, coinKind, currentPage, pageSize));
@@ -44,7 +47,8 @@ public class NoticeLogController {
   
   @GetMapping("/notice-logs")
   public ApiResponse getLogs(String userName,
-                             String monitorType, String eventName, String coinKind, Integer currentPage, Integer pageSize) {
+                             String monitorType, String eventName, List<String> coinKind, Integer currentPage,
+                             Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,

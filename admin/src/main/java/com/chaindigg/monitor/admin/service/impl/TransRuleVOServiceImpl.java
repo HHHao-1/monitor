@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, Trans
     implements ITransRuleVOService {
   
   public Map<String, Object> selectAll(
-      String coin, String userName, String userId, Integer currentPage, Integer pageSize) {
+      List<String> coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     IPage<TransRuleVO> page = new Page<TransRuleVO>(currentPage, pageSize);
     QueryWrapper<TransRuleVO> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("a.id");
@@ -36,8 +37,8 @@ public class TransRuleVOServiceImpl extends ServiceImpl<TransRuleVOMapper, Trans
     if (!StringUtils.isBlank(userName)) {
       queryWrapper.eq("b.name", userName);
     }
-    if (!StringUtils.isBlank(coin)) {
-      queryWrapper.eq("a.coin_kind", coin);
+    if (coin.size() != 0) {
+      queryWrapper.in("a.coin_kind", coin);
     }
     IPage<TransRuleVO> res = this.baseMapper.selectAll(queryWrapper, page);
     Map<String, Object> map = new HashMap<>();

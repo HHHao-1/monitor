@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,15 +28,15 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
   
   @Override
   public Map<String, Object> selectAll(
-      String mainChain, String coinName, Integer currentPage, Integer pageSize) {
+      List<String> mainChain, List<String> coinName, Integer currentPage, Integer pageSize) {
     IPage<CoinKind> page = new Page<CoinKind>(currentPage, pageSize);
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
     queryWrapper.orderByDesc("id");
-    if (!StringUtils.isBlank(mainChain)) {
-      queryWrapper.eq("main_chain", mainChain);
+    if (mainChain.size() != 0) {
+      queryWrapper.in("main_chain", mainChain);
     }
-    if (!StringUtils.isBlank(coinName)) {
-      queryWrapper.eq("coin_name", coinName);
+    if (coinName.size() != 0) {
+      queryWrapper.in("coin_name", coinName);
     }
     IPage<CoinKind> res = this.page(page, queryWrapper);
     Map<String, Object> map = new HashMap<>();
@@ -60,13 +61,9 @@ public class CoinKindServiceImpl extends ServiceImpl<CoinKindMapper, CoinKind>
   @Override
   public Boolean delete(String mainChain, String coinName, String contract, Integer point) {
     QueryWrapper<CoinKind> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("main_chain", mainChain).eq("point", point);
-    if (!StringUtils.isBlank(coinName)) {
-      queryWrapper.eq("coin_name", coinName);
-    }
-    if (!StringUtils.isBlank(contract)) {
-      queryWrapper.eq("contract_addr", contract);
-    }
+//    queryWrapper.eq("main_chain", mainChain).eq("point", point);
+    queryWrapper.eq("main_chain", mainChain).eq("point", point)
+        .eq("coin_name", coinName).eq("contract_addr", contract);
     return this.remove(queryWrapper);
   }
   
