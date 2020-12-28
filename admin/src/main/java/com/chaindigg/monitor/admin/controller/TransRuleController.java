@@ -25,7 +25,7 @@ public class TransRuleController {
   
   @GetMapping("/trans-rules")
   public ApiResponse getTransRules(
-      String coin, String userName, String userId, Integer currentPage, Integer pageSize) {
+      List<String> coin, String userName, String userId, Integer currentPage, Integer pageSize) {
     try {
       return ApiResponse.create(
           State.SUCCESS,
