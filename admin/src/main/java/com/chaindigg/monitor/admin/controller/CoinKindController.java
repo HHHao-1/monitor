@@ -33,6 +33,16 @@ public class CoinKindController {
     }
   }
   
+  @GetMapping("/coincontract")
+  public ApiResponse getCoinContract(@Nullable @RequestParam String[] coins) {
+    try {
+      return ApiResponse.create(State.SUCCESS, searchCoinKindService.searchCoinContract(coins));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ApiResponse.create(State.FAIL);
+    }
+  }
+  
   
   @GetMapping("/coinmain")
   public ApiResponse getCoinMain() {

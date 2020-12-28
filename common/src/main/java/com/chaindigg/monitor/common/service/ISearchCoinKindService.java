@@ -9,4 +9,6 @@ public interface ISearchCoinKindService extends IService<CoinKind> {
   List<String> searchCoinKind();
   
   List<String> searchCoinMain();
+  
+  List<String> searchCoinContract(String[] coins);
 }
