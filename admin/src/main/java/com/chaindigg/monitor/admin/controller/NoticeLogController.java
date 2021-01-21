@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 /**
  * 服务控制器
  *
@@ -20,7 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 public class NoticeLogController {
-  private final INoticeLogService noticeLogService;
+  // private final INoticeLogService noticeLogService;
+  @Resource()
+  private INoticeLogService noticeLogService;
   
   @GetMapping("/notice-logs/addr")
   public ApiResponse getAddrNoticeLogs(Integer ruleId, String userName,
