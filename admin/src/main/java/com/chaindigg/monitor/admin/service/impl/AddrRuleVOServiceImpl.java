@@ -43,6 +43,6 @@ public class AddrRuleVOServiceImpl extends ServiceImpl<AddrRuleVOMapper, AddrRul
     Map<String, Object> map = new HashMap<>();
     map.put("total", res.getTotal());
     map.put("data", res.getRecords());
-    return map;
+    // return map;
   }
 }
